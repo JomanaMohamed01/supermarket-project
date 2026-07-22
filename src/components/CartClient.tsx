@@ -14,9 +14,12 @@ type CartRow = {
 
 export function CartClient({ items }: { items: CartRow[] }) {
   const router = useRouter();
-  const supabase = createClient();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  function supabase() {
+    return createClient();
+  }
 
   const total = items.reduce(
     (sum, item) => sum + Number(item.product.price) * item.quantity,
@@ -28,13 +31,13 @@ export function CartClient({ items }: { items: CartRow[] }) {
     setError(null);
     try {
       if (quantity < 1) {
-        const { error: deleteError } = await supabase
+        const { error: deleteError } = await supabase()
           .from("cart_items")
           .delete()
           .eq("id", id);
         if (deleteError) throw deleteError;
       } else {
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabase()
           .from("cart_items")
           .update({ quantity })
           .eq("id", id);
@@ -52,7 +55,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
     setBusyId(id);
     setError(null);
     try {
-      const { error: deleteError } = await supabase
+      const { error: deleteError } = await supabase()
         .from("cart_items")
         .delete()
         .eq("id", id);

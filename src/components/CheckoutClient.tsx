@@ -14,7 +14,6 @@ type CartRow = {
 
 export function CheckoutClient({ items }: { items: CartRow[] }) {
   const router = useRouter();
-  const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +27,7 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
     setError(null);
 
     try {
+      const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();

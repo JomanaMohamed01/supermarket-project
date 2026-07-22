@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Shop fresh groceries by category — meat, dairy, produce, and more.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{

@@ -10,7 +10,6 @@ type AddToCartButtonProps = {
 
 export function AddToCartButton({ productId }: AddToCartButtonProps) {
   const router = useRouter();
-  const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -19,6 +18,7 @@ export function AddToCartButton({ productId }: AddToCartButtonProps) {
     setMessage(null);
 
     try {
+      const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();

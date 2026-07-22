@@ -13,7 +13,6 @@ type SiteHeaderProps = {
 export function SiteHeader({ cartCount = 0, email }: SiteHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -22,6 +21,7 @@ export function SiteHeader({ cartCount = 0, email }: SiteHeaderProps) {
 
   async function signOut() {
     setMenuOpen(false);
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
