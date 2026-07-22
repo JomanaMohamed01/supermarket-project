@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
 import type { Category } from "@/lib/types";
 
 export default async function CategoriesPage() {
-  const supabase = await createClient();
+  const { supabase } = await requireUser();
   const { data, error } = await supabase
     .from("categories")
     .select("*")

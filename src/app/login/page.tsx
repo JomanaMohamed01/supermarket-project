@@ -1,5 +1,7 @@
 import { AuthForm } from "@/components/AuthForm";
+import { redirectIfAuthenticated } from "@/lib/auth";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  await redirectIfAuthenticated();
   return <AuthForm mode="login" />;
 }

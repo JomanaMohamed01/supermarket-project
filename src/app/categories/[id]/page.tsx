@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { AppShell } from "@/components/AppShell";
+import { requireUser } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
-import { createClient } from "@/lib/supabase/server";
 import type { Category, Product } from "@/lib/types";
 
 type PageProps = {
@@ -12,7 +12,7 @@ type PageProps = {
 
 export default async function CategoryProductsPage({ params }: PageProps) {
   const { id } = await params;
-  const supabase = await createClient();
+  const { supabase } = await requireUser();
 
   const { data: category } = await supabase
     .from("categories")

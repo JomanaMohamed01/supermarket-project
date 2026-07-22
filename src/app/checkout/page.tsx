@@ -1,16 +1,10 @@
 import { AppShell } from "@/components/AppShell";
 import { CheckoutClient } from "@/components/CheckoutClient";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
 import type { Product } from "@/lib/types";
-import { redirect } from "next/navigation";
 
 export default async function CheckoutPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   const { data, error } = await supabase
     .from("cart_items")
@@ -19,11 +13,13 @@ export default async function CheckoutPage() {
     .order("created_at", { ascending: true });
 
   const items =
-    data?.map((row) => ({
-      id: row.id as string,
-      quantity: row.quantity as number,
-      product: row.product as unknown as Product,
-    })).filter((row) => row.product) ?? [];
+    data
+      ?.map((row) => ({
+        id: row.id as string,
+        quantity: row.quantity as number,
+        product: row.product as unknown as Product,
+      }))
+      .filter((row) => row.product) ?? [];
 
   return (
     <AppShell>

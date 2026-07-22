@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
+import { requireUser } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 
 type PageProps = {
   searchParams: Promise<{ order?: string }>;
@@ -10,12 +9,7 @@ type PageProps = {
 
 export default async function OrderSuccessPage({ searchParams }: PageProps) {
   const { order: orderId } = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/login");
+  const { supabase, user } = await requireUser();
 
   let total: number | null = null;
   if (orderId) {
