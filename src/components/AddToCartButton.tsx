@@ -28,12 +28,14 @@ export function AddToCartButton({ productId }: AddToCartButtonProps) {
         return;
       }
 
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from("cart_items")
         .select("id, quantity")
         .eq("user_id", user.id)
         .eq("product_id", productId)
         .maybeSingle();
+
+      if (existingError) throw existingError;
 
       if (existing) {
         const { error } = await supabase
@@ -47,7 +49,27 @@ export function AddToCartButton({ productId }: AddToCartButtonProps) {
           product_id: productId,
           quantity: 1,
         });
-        if (error) throw error;
+
+        // If the row already exists (unique conflict), bump quantity instead
+        if (error?.code === "23505") {
+          const { data: row, error: refetchError } = await supabase
+            .from("cart_items")
+            .select("id, quantity")
+            .eq("user_id", user.id)
+            .eq("product_id", productId)
+            .maybeSingle();
+
+          if (refetchError) throw refetchError;
+          if (!row) throw error;
+
+          const { error: updateError } = await supabase
+            .from("cart_items")
+            .update({ quantity: row.quantity + 1 })
+            .eq("id", row.id);
+          if (updateError) throw updateError;
+        } else if (error) {
+          throw error;
+        }
       }
 
       setMessage("Added to cart");
