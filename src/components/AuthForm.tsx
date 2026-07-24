@@ -12,6 +12,8 @@ type AuthFormProps = {
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -36,10 +38,13 @@ export function AuthForm({ mode }: AuthFormProps) {
         if (signUpError) throw signUpError;
 
         if (data.user) {
-          await supabase.from("profiles").upsert({
+          const { error: profileError } = await supabase.from("profiles").upsert({
             id: data.user.id,
             full_name: fullName || null,
+            phone: phone || null,
+            address: address || null,
           });
+          if (profileError) throw profileError;
         }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -93,16 +98,41 @@ export function AuthForm({ mode }: AuthFormProps) {
 
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
           {isSignup && (
-            <label className="block space-y-1.5">
-              <span className="text-sm font-semibold text-ink-soft">Full name</span>
-              <input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
-                placeholder="Your name"
-                autoComplete="name"
-              />
-            </label>
+            <>
+              <label className="block space-y-1.5">
+                <span className="text-sm font-semibold text-ink-soft">Full name</span>
+                <input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
+                  placeholder="Your name"
+                  autoComplete="name"
+                />
+              </label>
+
+              <label className="block space-y-1.5">
+                <span className="text-sm font-semibold text-ink-soft">Phone number</span>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
+                  placeholder="e.g. 05XXXXXXXX"
+                  autoComplete="tel"
+                />
+              </label>
+
+              <label className="block space-y-1.5">
+                <span className="text-sm font-semibold text-ink-soft">Address</span>
+                <input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
+                  placeholder="Street, city"
+                  autoComplete="street-address"
+                />
+              </label>
+            </>
           )}
 
           <label className="block space-y-1.5">

@@ -109,7 +109,7 @@ export function SiteHeader({ cartCount = 0, email }: SiteHeaderProps) {
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 z-20 mt-2 w-44 animate-fade rounded-2xl border border-line bg-cream p-2 shadow-[var(--shadow)]">
+            <div className="absolute right-0 z-20 mt-2 flex w-44 animate-fade flex-col gap-1 rounded-2xl border border-line bg-cream p-2 shadow-[var(--shadow)]">
               <Link
                 href="/categories"
                 className={mobileLinkClass("/categories")}
@@ -129,7 +129,7 @@ export function SiteHeader({ cartCount = 0, email }: SiteHeaderProps) {
                 <button
                   type="button"
                   onClick={signOut}
-                  className="mt-1 w-full rounded-xl px-3 py-3 text-left text-sm font-semibold text-ink-soft transition hover:bg-bg-deep hover:text-ink"
+                  className="w-full rounded-xl px-3 py-3 text-left text-sm font-semibold text-ink-soft transition hover:bg-bg-deep hover:text-ink"
                 >
                   Sign out
                 </button>
