@@ -84,7 +84,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <section className="animate-fade mx-auto w-full max-w-md rounded-[1.75rem] border border-line bg-cream/90 p-8 shadow-[var(--shadow)] backdrop-blur">
         <h2 className="font-[family-name:var(--font-fraunces)] text-3xl font-semibold text-ink">
-          {isSignup ? "Create account" : "Welcome back"}
+          {isSignup ? "Create a new account" : "Welcome back"}
         </h2>
         <p className="mt-2 text-sm text-ink-soft">
           {isSignup ? "Already shopping with us?" : "New here?"}{" "}
