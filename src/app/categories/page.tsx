@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { requireUser } from "@/lib/auth";
 import type { Category } from "@/lib/types";
 
@@ -40,8 +41,12 @@ export default async function CategoriesPage() {
             className="group relative overflow-hidden rounded-[1.5rem] border border-line bg-cream/85 p-6 shadow-[var(--shadow)] transition duration-300 hover:-translate-y-1 hover:border-leaf/30"
           >
             <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-leaf transition duration-300 group-hover:scale-x-100" />
-            <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-bg-deep font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-leaf">
-              {category.name.slice(0, 1)}
+            <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-bg-deep text-leaf">
+              <CategoryIcon
+                name={category.name}
+                slug={category.slug}
+                className="h-7 w-7"
+              />
             </div>
             <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
               {category.name}

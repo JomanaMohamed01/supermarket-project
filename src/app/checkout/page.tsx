@@ -23,25 +23,27 @@ export default async function CheckoutPage() {
 
   return (
     <AppShell>
-      <div className="mb-8 max-w-2xl">
-        <p className="text-sm font-semibold tracking-[0.16em] text-leaf uppercase">
-          Checkout
-        </p>
-        <h1 className="mt-2 font-[family-name:var(--font-fraunces)] text-4xl font-semibold text-ink">
-          Review & pay
-        </h1>
-        <p className="mt-2 text-ink-soft">
-          Confirm your items. The total appears below, right before payment.
-        </p>
+      <div className="mx-auto w-full max-w-2xl text-center">
+        <div className="mb-8">
+          <p className="text-sm font-semibold tracking-[0.16em] text-leaf uppercase">
+            Checkout
+          </p>
+          <h1 className="mt-2 font-[family-name:var(--font-fraunces)] text-4xl font-semibold text-ink">
+            Review & pay
+          </h1>
+          <p className="mt-2 text-ink-soft">
+            Confirm your items. The total appears below, right before payment.
+          </p>
+        </div>
+
+        {error && (
+          <p className="mb-6 rounded-xl bg-danger/10 px-4 py-3 text-danger">
+            {error.message}
+          </p>
+        )}
+
+        <CheckoutClient items={items} />
       </div>
-
-      {error && (
-        <p className="mb-6 rounded-xl bg-danger/10 px-4 py-3 text-danger">
-          {error.message}
-        </p>
-      )}
-
-      <CheckoutClient items={items} />
     </AppShell>
   );
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Nunito_Sans } from "next/font/google";
+import { Suspense } from "react";
+import { NavigationLoader } from "@/components/NavigationLoader";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -28,7 +30,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${fraunces.variable} ${nunito.variable} h-full`}>
-      <body className="relative min-h-full antialiased">{children}</body>
+      <body className="relative min-h-full antialiased">
+        <Suspense fallback={null}>
+          <NavigationLoader />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }

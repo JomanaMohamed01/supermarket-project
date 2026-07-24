@@ -106,12 +106,12 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
   }
 
   return (
-    <div className="animate-rise mx-auto max-w-2xl space-y-8">
+    <div className="animate-rise space-y-8 text-left">
       <ul className="space-y-4">
         {items.map((item) => (
           <li
             key={item.id}
-            className="flex items-start justify-between gap-4 border-b border-line pb-4"
+            className="flex items-start justify-between gap-4 border-b border-line pb-4 text-left"
           >
             <div>
               <p className="font-semibold text-ink">{item.product.name}</p>
@@ -126,7 +126,7 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
         ))}
       </ul>
 
-      <div className="rounded-[1.25rem] bg-cream/90 px-5 py-5 shadow-[var(--shadow)]">
+      <div className="rounded-[1.25rem] bg-cream/90 px-5 py-5 text-left shadow-[var(--shadow)]">
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-sm text-ink-soft">Order total</p>
@@ -138,7 +138,7 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
       </div>
 
       {error && (
-        <p className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
+        <p className="rounded-xl bg-danger/10 px-4 py-3 text-left text-sm text-danger">
           {error}
         </p>
       )}
