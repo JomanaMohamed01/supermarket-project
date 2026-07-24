@@ -47,11 +47,39 @@ export function AuthForm({ mode }: AuthFormProps) {
           if (profileError) throw profileError;
         }
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const { data: signInData, error: signInError } =
+          await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
         if (signInError) throw signInError;
+
+        const user = signInData.user;
+        let welcomeName =
+          (typeof user.user_metadata?.full_name === "string"
+            ? user.user_metadata.full_name.trim()
+            : "") ||
+          user.email?.split("@")[0] ||
+          "";
+
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (profile?.full_name?.trim()) {
+            welcomeName = profile.full_name.trim();
+          }
+        }
+
+        if (welcomeName) {
+          sessionStorage.setItem("freshlane_welcome_name", welcomeName);
+        }
+
+        router.push("/categories?welcome=1");
+        router.refresh();
+        return;
       }
 
       router.push("/categories");
