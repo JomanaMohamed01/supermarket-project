@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { ActionLoader } from "@/components/ActionLoader";
 import { createClient } from "@/lib/supabase/client";
 
 type AuthFormProps = {
@@ -40,6 +41,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setError(null);
     setAddressError(null);
     setLoading(true);
+    let keepAuthLoader = false;
 
     try {
       const supabase = createClient();
@@ -101,6 +103,8 @@ export function AuthForm({ mode }: AuthFormProps) {
           });
           if (profileError) throw profileError;
         }
+
+        keepAuthLoader = true;
       } else {
         const { data: signInData, error: signInError } =
           await supabase.auth.signInWithPassword({
@@ -132,6 +136,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           sessionStorage.setItem("freshlane_welcome_name", welcomeName);
         }
 
+        keepAuthLoader = true;
         router.push("/categories?welcome=1");
         router.refresh();
         return;
@@ -142,7 +147,9 @@ export function AuthForm({ mode }: AuthFormProps) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
-      setLoading(false);
+      if (!keepAuthLoader) {
+        setLoading(false);
+      }
     }
   }
 
@@ -153,7 +160,14 @@ export function AuthForm({ mode }: AuthFormProps) {
     "?";
 
   return (
-    <div className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-6xl items-center gap-10 px-4 py-10 lg:grid-cols-2 lg:px-6">
+    <>
+      {loading && (
+        <ActionLoader
+          message={isSignup ? "Creating account..." : "Signing in..."}
+        />
+      )}
+
+      <div className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-6xl items-center gap-10 px-4 py-10 lg:grid-cols-2 lg:px-6">
       <section className="animate-rise relative overflow-hidden rounded-[2rem] bg-leaf px-8 py-12 text-cream shadow-[var(--shadow)] sm:px-12">
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-citrus/30 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-16 left-10 h-48 w-48 rounded-full bg-cream/10 blur-3xl" />
@@ -342,5 +356,6 @@ export function AuthForm({ mode }: AuthFormProps) {
         </form>
       </section>
     </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { ActionLoader } from "@/components/ActionLoader";
 import { createClient } from "@/lib/supabase/client";
 
 export type AccountProfile = {
@@ -136,6 +137,7 @@ export function AccountClient({ profile }: AccountClientProps) {
   }
 
   async function deleteAccount() {
+    setConfirmDeleteOpen(false);
     setDeletingAccount(true);
     setMessage(null);
     setError(null);
@@ -171,6 +173,7 @@ export function AccountClient({ profile }: AccountClientProps) {
 
   return (
     <div className="mx-auto max-w-xl space-y-8">
+      {deletingAccount && <ActionLoader message="Deleting account..." />}
       <div className="rounded-[1.5rem] border border-line bg-cream/90 p-6 shadow-[var(--shadow)] sm:p-8">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
           <div className="relative">
