@@ -70,6 +70,11 @@ export function SiteHeader({ cartCount = 0, email }: SiteHeaderProps) {
             )}
           </Link>
           {email && (
+            <Link href="/account" className={linkClass("/account")}>
+              My account
+            </Link>
+          )}
+          {email && (
             <button
               type="button"
               onClick={signOut}
@@ -125,6 +130,15 @@ export function SiteHeader({ cartCount = 0, email }: SiteHeaderProps) {
                 Cart
                 {cartCount > 0 ? ` (${cartCount})` : ""}
               </Link>
+              {email && (
+                <Link
+                  href="/account"
+                  className={mobileLinkClass("/account")}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  My account
+                </Link>
+              )}
               {email && (
                 <button
                   type="button"

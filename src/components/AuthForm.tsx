@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type AuthFormProps = {
@@ -11,23 +12,54 @@ type AuthFormProps = {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [addressError, setAddressError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!avatarFile) {
+      setAvatarPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(avatarFile);
+    setAvatarPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [avatarFile]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setAddressError(null);
     setLoading(true);
 
     try {
       const supabase = createClient();
 
       if (mode === "signup") {
+        if (!address.trim()) {
+          setAddressError("This field must be filled");
+          setLoading(false);
+          return;
+        }
+
+        if (avatarFile) {
+          if (!avatarFile.type.startsWith("image/")) {
+            throw new Error("Profile picture must be an image.");
+          }
+          if (avatarFile.size > 5 * 1024 * 1024) {
+            throw new Error("Profile picture must be under 5MB.");
+          }
+        }
+
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -38,11 +70,34 @@ export function AuthForm({ mode }: AuthFormProps) {
         if (signUpError) throw signUpError;
 
         if (data.user) {
+          let avatarUrl: string | null = null;
+
+          if (avatarFile && data.session) {
+            const ext = avatarFile.name.split(".").pop()?.toLowerCase() || "jpg";
+            const path = `${data.user.id}/avatar.${ext}`;
+
+            const { error: uploadError } = await supabase.storage
+              .from("avatars")
+              .upload(path, avatarFile, {
+                upsert: true,
+                contentType: avatarFile.type,
+              });
+
+            if (uploadError) throw uploadError;
+
+            const {
+              data: { publicUrl },
+            } = supabase.storage.from("avatars").getPublicUrl(path);
+
+            avatarUrl = `${publicUrl}?t=${Date.now()}`;
+          }
+
           const { error: profileError } = await supabase.from("profiles").upsert({
             id: data.user.id,
             full_name: fullName || null,
             phone: phone || null,
-            address: address || null,
+            address: address.trim(),
+            ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
           });
           if (profileError) throw profileError;
         }
@@ -92,6 +147,10 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   const isSignup = mode === "signup";
+  const initials =
+    fullName.trim().charAt(0).toUpperCase() ||
+    email.trim().charAt(0).toUpperCase() ||
+    "?";
 
   return (
     <div className="mx-auto grid min-h-[calc(100vh-2rem)] max-w-6xl items-center gap-10 px-4 py-10 lg:grid-cols-2 lg:px-6">
@@ -118,7 +177,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           {isSignup ? "Already shopping with us?" : "New here?"}{" "}
           <Link
             href={isSignup ? "/login" : "/signup"}
-            className="font-semibold text-leaf underline-offset-2 hover:underline"
+            className="font-semibold text-leaf"
           >
             {isSignup ? "Sign in" : "Sign up"}
           </Link>
@@ -127,6 +186,57 @@ export function AuthForm({ mode }: AuthFormProps) {
         <form onSubmit={onSubmit} className="mt-8 space-y-4">
           {isSignup && (
             <>
+              <div className="flex items-center gap-4">
+                <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-bg-deep text-xl font-semibold text-leaf">
+                  {avatarPreview ? (
+                    <img
+                      src={avatarPreview}
+                      alt="Profile preview"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initials
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-ink-soft">
+                    Profile picture
+                  </p>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) =>
+                      setAvatarFile(e.target.files?.[0] ?? null)
+                    }
+                  />
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="rounded-lg border border-line bg-white px-2.5 py-1.5 text-xs font-semibold text-ink transition hover:border-leaf/40"
+                    >
+                      {avatarFile ? "Change photo" : "Choose photo"}
+                    </button>
+                    {avatarFile && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAvatarFile(null);
+                          if (avatarInputRef.current) {
+                            avatarInputRef.current.value = "";
+                          }
+                        }}
+                        className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-ink-soft transition hover:text-ink"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <label className="block space-y-1.5">
                 <span className="text-sm font-semibold text-ink-soft">Full name</span>
                 <input
@@ -154,11 +264,19 @@ export function AuthForm({ mode }: AuthFormProps) {
                 <span className="text-sm font-semibold text-ink-soft">Address</span>
                 <input
                   value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                    if (addressError) setAddressError(null);
+                  }}
+                  className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${
+                    addressError ? "border-danger" : "border-line"
+                  }`}
                   placeholder="Street, city"
                   autoComplete="street-address"
                 />
+                {addressError && (
+                  <p className="text-sm font-medium text-danger">{addressError}</p>
+                )}
               </label>
             </>
           )}
@@ -178,16 +296,30 @@ export function AuthForm({ mode }: AuthFormProps) {
 
           <label className="block space-y-1.5">
             <span className="text-sm font-semibold text-ink-soft">Password</span>
-            <input
-              type="password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
-              placeholder="At least 6 characters"
-              autoComplete={isSignup ? "new-password" : "current-password"}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-line bg-white py-3 pr-11 pl-3.5 outline-none ring-leaf/30 transition focus:ring-2"
+                placeholder="At least 6 characters"
+                autoComplete={isSignup ? "new-password" : "current-password"}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((open) => !open)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-ink-soft transition hover:text-ink"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" strokeWidth={2} />
+                ) : (
+                  <Eye className="h-5 w-5" strokeWidth={2} />
+                )}
+              </button>
+            </div>
           </label>
 
           {error && (

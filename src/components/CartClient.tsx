@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ActionLoader } from "@/components/ActionLoader";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/format";
 import type { Product } from "@/lib/types";
@@ -15,6 +16,7 @@ type CartRow = {
 export function CartClient({ items }: { items: CartRow[] }) {
   const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function supabase() {
@@ -29,8 +31,11 @@ export function CartClient({ items }: { items: CartRow[] }) {
   async function updateQuantity(id: string, quantity: number) {
     setBusyId(id);
     setError(null);
+    const isDelete = quantity < 1;
+    if (isDelete) setDeleting(true);
+
     try {
-      if (quantity < 1) {
+      if (isDelete) {
         const { error: deleteError } = await supabase()
           .from("cart_items")
           .delete()
@@ -44,15 +49,20 @@ export function CartClient({ items }: { items: CartRow[] }) {
         if (updateError) throw updateError;
       }
       router.refresh();
+      if (isDelete) {
+        await new Promise((resolve) => setTimeout(resolve, 350));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update cart");
     } finally {
       setBusyId(null);
+      setDeleting(false);
     }
   }
 
   async function removeItem(id: string) {
     setBusyId(id);
+    setDeleting(true);
     setError(null);
     try {
       const { error: deleteError } = await supabase()
@@ -61,10 +71,12 @@ export function CartClient({ items }: { items: CartRow[] }) {
         .eq("id", id);
       if (deleteError) throw deleteError;
       router.refresh();
+      await new Promise((resolve) => setTimeout(resolve, 350));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not remove item");
     } finally {
       setBusyId(null);
+      setDeleting(false);
     }
   }
 
@@ -87,7 +99,10 @@ export function CartClient({ items }: { items: CartRow[] }) {
   }
 
   return (
-    <div className="animate-rise space-y-8">
+    <>
+      {deleting && <ActionLoader message="Deleting item..." />}
+
+      <div className="animate-rise space-y-8">
       <ul className="space-y-6">
         {items.map((item) => (
           <li
@@ -165,6 +180,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
           Go to checkout
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
