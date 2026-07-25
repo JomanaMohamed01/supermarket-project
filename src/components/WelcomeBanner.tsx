@@ -7,10 +7,10 @@ type WelcomeBannerProps = {
   name: string | null;
 };
 
-function firstName(name: string) {
-  const part = name.trim().split(/\s+/)[0] ?? "";
-  if (!part) return "";
-  return part.charAt(0).toUpperCase() + part.slice(1);
+function firstName(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  return trimmed.split(/\s+/)[0] ?? trimmed;
 }
 
 export function WelcomeBanner({ name }: WelcomeBannerProps) {
@@ -62,9 +62,8 @@ export function WelcomeBanner({ name }: WelcomeBannerProps) {
     <div className="pointer-events-none fixed inset-x-0 top-0 z-[110] flex justify-center px-4 pt-4 sm:pt-5">
       <div
         role="status"
-        className={`welcome-toast rounded-2xl border border-leaf/20 bg-leaf px-5 py-3 text-sm font-semibold text-cream shadow-[var(--shadow)] sm:text-base ${
-          phase === "in" ? "welcome-toast-in" : "welcome-toast-out"
-        }`}
+        className={`welcome-toast rounded-2xl border border-leaf/20 bg-leaf px-5 py-3 text-sm font-semibold text-cream shadow-[var(--shadow)] sm:text-base ${phase === "in" ? "welcome-toast-in" : "welcome-toast-out"
+          }`}
       >
         Welcome back, {displayName}!
       </div>
