@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ActionLoader } from "@/components/ActionLoader";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/format";
@@ -15,24 +15,42 @@ type CartRow = {
 
 export function CartClient({ items }: { items: CartRow[] }) {
   const router = useRouter();
+  const [localItems, setLocalItems] = useState(items);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [loaderMessage, setLoaderMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLocalItems(items);
+  }, [items]);
 
   function supabase() {
     return createClient();
   }
 
-  const total = items.reduce(
+  const total = localItems.reduce(
     (sum, item) => sum + Number(item.product.price) * item.quantity,
     0,
   );
 
   async function updateQuantity(id: string, quantity: number) {
+    const current = localItems.find((item) => item.id === id)?.quantity ?? 0;
+    const previousItems = localItems;
+    const isDelete = quantity < 1;
+
     setBusyId(id);
     setError(null);
-    const isDelete = quantity < 1;
-    if (isDelete) setDeleting(true);
+    setLoaderMessage(
+      isDelete || quantity < current ? "Removing item..." : "Adding item...",
+    );
+
+    if (isDelete) {
+      setLocalItems((prev) => prev.filter((item) => item.id !== id));
+    } else {
+      setLocalItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, quantity } : item)),
+      );
+    }
 
     try {
       if (isDelete) {
@@ -49,21 +67,23 @@ export function CartClient({ items }: { items: CartRow[] }) {
         if (updateError) throw updateError;
       }
       router.refresh();
-      if (isDelete) {
-        await new Promise((resolve) => setTimeout(resolve, 350));
-      }
     } catch (err) {
+      setLocalItems(previousItems);
       setError(err instanceof Error ? err.message : "Could not update cart");
     } finally {
       setBusyId(null);
-      setDeleting(false);
+      setLoaderMessage(null);
     }
   }
 
   async function removeItem(id: string) {
+    const previousItems = localItems;
+
     setBusyId(id);
-    setDeleting(true);
+    setLoaderMessage("Removing item...");
     setError(null);
+    setLocalItems((prev) => prev.filter((item) => item.id !== id));
+
     try {
       const { error: deleteError } = await supabase()
         .from("cart_items")
@@ -71,115 +91,118 @@ export function CartClient({ items }: { items: CartRow[] }) {
         .eq("id", id);
       if (deleteError) throw deleteError;
       router.refresh();
-      await new Promise((resolve) => setTimeout(resolve, 350));
     } catch (err) {
+      setLocalItems(previousItems);
       setError(err instanceof Error ? err.message : "Could not remove item");
     } finally {
       setBusyId(null);
-      setDeleting(false);
+      setLoaderMessage(null);
     }
   }
 
-  if (items.length === 0) {
+  if (localItems.length === 0) {
     return (
-      <div className="animate-rise rounded-[1.5rem] border border-dashed border-line bg-cream/60 px-6 py-16 text-center">
-        <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold">
-          Your cart is empty
-        </h2>
-        <p className="mt-2 text-ink-soft">Browse an aisle and add a few items.</p>
-        <button
-          type="button"
-          onClick={() => router.push("/categories")}
-          className="mt-6 rounded-xl bg-leaf px-5 py-3 font-semibold text-cream"
-        >
-          Start shopping
-        </button>
-      </div>
+      <>
+        {loaderMessage && <ActionLoader message={loaderMessage} />}
+        <div className="animate-rise rounded-[1.5rem] border border-dashed border-line bg-cream/60 px-6 py-16 text-center">
+          <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold">
+            Your cart is empty
+          </h2>
+          <p className="mt-2 text-ink-soft">Browse an aisle and add a few items.</p>
+          <button
+            type="button"
+            onClick={() => router.push("/categories")}
+            className="mt-6 rounded-xl bg-leaf px-5 py-3 font-semibold text-cream"
+          >
+            Start shopping
+          </button>
+        </div>
+      </>
     );
   }
 
   return (
     <>
-      {deleting && <ActionLoader message="Deleting item..." />}
+      {loaderMessage && <ActionLoader message={loaderMessage} />}
 
       <div className="animate-rise space-y-8">
-      <ul className="space-y-6">
-        {items.map((item) => (
-          <li
-            key={item.id}
-            className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div>
-              <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
-                {item.product.name}
-              </h2>
-              <p className="mt-1 text-sm text-ink-soft">
-                {formatMoney(Number(item.product.price))}
-                {item.product.unit ? ` / ${item.product.unit}` : ""}
-              </p>
-              <p className="mt-2 font-semibold text-leaf">
-                Line: {formatMoney(Number(item.product.price) * item.quantity)}
-              </p>
-            </div>
+        <ul className="space-y-6">
+          {localItems.map((item) => (
+            <li
+              key={item.id}
+              className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
+                  {item.product.name}
+                </h2>
+                <p className="mt-1 text-sm text-ink-soft">
+                  {formatMoney(Number(item.product.price))}
+                  {item.product.unit ? ` / ${item.product.unit}` : ""}
+                </p>
+                <p className="mt-2 font-semibold text-leaf">
+                  Line: {formatMoney(Number(item.product.price) * item.quantity)}
+                </p>
+              </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center rounded-xl border border-line bg-cream">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center rounded-xl border border-line bg-cream">
+                  <button
+                    type="button"
+                    disabled={busyId === item.id}
+                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    className="px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
+                    aria-label="Decrease quantity"
+                  >
+                    −
+                  </button>
+                  <span className="min-w-8 text-center font-semibold">
+                    {item.quantity}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={busyId === item.id}
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    className="px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
                 <button
                   type="button"
                   disabled={busyId === item.id}
-                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                  className="px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
-                  aria-label="Decrease quantity"
+                  onClick={() => removeItem(item.id)}
+                  className="text-sm font-semibold text-danger hover:underline disabled:opacity-50"
                 >
-                  −
-                </button>
-                <span className="min-w-8 text-center font-semibold">
-                  {item.quantity}
-                </span>
-                <button
-                  type="button"
-                  disabled={busyId === item.id}
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  className="px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
-                  aria-label="Increase quantity"
-                >
-                  +
+                  Remove
                 </button>
               </div>
-              <button
-                type="button"
-                disabled={busyId === item.id}
-                onClick={() => removeItem(item.id)}
-                className="text-sm font-semibold text-danger hover:underline disabled:opacity-50"
-              >
-                Remove
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
 
-      {error && (
-        <p className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
-          {error}
-        </p>
-      )}
-
-      <div className="flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm text-ink-soft">Cart subtotal</p>
-          <p className="font-[family-name:var(--font-fraunces)] text-3xl font-semibold text-ink">
-            {formatMoney(total)}
+        {error && (
+          <p className="rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">
+            {error}
           </p>
+        )}
+
+        <div className="flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm text-ink-soft">Cart subtotal</p>
+            <p className="font-[family-name:var(--font-fraunces)] text-3xl font-semibold text-ink">
+              {formatMoney(total)}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push("/checkout")}
+            className="rounded-xl bg-leaf px-6 py-3.5 font-semibold text-cream transition hover:bg-leaf-bright"
+          >
+            Go to checkout
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => router.push("/checkout")}
-          className="rounded-xl bg-leaf px-6 py-3.5 font-semibold text-cream transition hover:bg-leaf-bright"
-        >
-          Go to checkout
-        </button>
-      </div>
       </div>
     </>
   );
