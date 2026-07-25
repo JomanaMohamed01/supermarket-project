@@ -7,24 +7,32 @@ type WelcomeBannerProps = {
   name: string | null;
 };
 
+function firstName(name: string) {
+  const part = name.trim().split(/\s+/)[0] ?? "";
+  if (!part) return "";
+  return part.charAt(0).toUpperCase() + part.slice(1);
+}
+
 export function WelcomeBanner({ name }: WelcomeBannerProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [phase, setPhase] = useState<"hidden" | "in" | "out">("hidden");
-  const [displayName, setDisplayName] = useState(name?.trim() || "");
+  const [displayName, setDisplayName] = useState(
+    name ? firstName(name) : "",
+  );
 
   const shouldWelcome = searchParams.get("welcome") === "1";
 
   useEffect(() => {
     const stored = sessionStorage.getItem("freshlane_welcome_name");
     if (stored?.trim()) {
-      setDisplayName(stored.trim());
+      setDisplayName(firstName(stored));
       sessionStorage.removeItem("freshlane_welcome_name");
       return;
     }
     if (name?.trim()) {
-      setDisplayName(name.trim());
+      setDisplayName(firstName(name));
     }
   }, [name]);
 

@@ -11,6 +11,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   let cartCount = 0;
   let fullName: string | null = null;
+  let avatarUrl: string | null = null;
 
   if (user) {
     const [{ data: cartRows }, { data: profile }] = await Promise.all([
@@ -20,7 +21,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         .eq("user_id", user.id),
       supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, avatar_url")
         .eq("id", user.id)
         .maybeSingle(),
     ]);
@@ -36,11 +37,17 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         : "") ||
       user.email?.split("@")[0] ||
       null;
+    avatarUrl = profile?.avatar_url ?? null;
   }
 
   return (
     <div className="relative z-10 flex min-h-screen flex-col">
-      <SiteHeader cartCount={cartCount} email={user?.email} />
+      <SiteHeader
+        cartCount={cartCount}
+        email={user?.email}
+        avatarUrl={avatarUrl}
+        fullName={fullName}
+      />
       <Suspense fallback={null}>
         <WelcomeBanner name={fullName} />
       </Suspense>
