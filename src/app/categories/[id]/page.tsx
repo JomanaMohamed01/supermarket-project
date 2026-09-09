@@ -59,7 +59,7 @@ export default async function CategoryProductsPage({ params }: PageProps) {
         {list.map((product) => (
           <article
             key={product.id}
-            className="flex flex-col justify-between border-b border-line pb-5"
+            className="flex flex-col justify-between border-b border-line pb-8 last:border-b-0"
           >
             <div>
               <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
