@@ -46,6 +46,79 @@ function fileToDataUrl(file: File) {
   });
 }
 
+const ALLOWED_EMAIL_DOMAINS = new Set([
+  "gmail.com",
+  "googlemail.com",
+  "outlook.com",
+  "hotmail.com",
+  "live.com",
+  "msn.com",
+  "yahoo.com",
+  "ymail.com",
+  "icloud.com",
+  "me.com",
+  "mac.com",
+  "proton.me",
+  "protonmail.com",
+  "aol.com",
+  "zoho.com",
+]);
+
+const COMMON_DOMAIN_TYPOS: Record<string, string> = {
+  "gmial.com": "gmail.com",
+  "gmal.com": "gmail.com",
+  "gamil.com": "gmail.com",
+  "gnail.com": "gmail.com",
+  "gmai.com": "gmail.com",
+  "gmail.co": "gmail.com",
+  "gmail.cm": "gmail.com",
+  "gmail.con": "gmail.com",
+  "outlok.com": "outlook.com",
+  "outllok.com": "outlook.com",
+  "outloook.com": "outlook.com",
+  "outlo0k.com": "outlook.com",
+  "outlokk.com": "outlook.com",
+  "outlook.co": "outlook.com",
+  "outlook.cm": "outlook.com",
+  "outlook.con": "outlook.com",
+  "hotmial.com": "hotmail.com",
+  "hotmal.com": "hotmail.com",
+  "hotmail.co": "hotmail.com",
+  "yaho.com": "yahoo.com",
+  "yahooo.com": "yahoo.com",
+  "yahoo.co": "yahoo.com",
+};
+
+function getEmailDomain(value: string) {
+  const at = value.lastIndexOf("@");
+  if (at < 0) return "";
+  return value.slice(at + 1).trim().toLowerCase();
+}
+
+function getEmailValidationError(value: string): string | null {
+  const email = value.trim();
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+    return "Please write your email correctly (e.g. name@gmail.com)";
+  }
+
+  const domain = getEmailDomain(email);
+  if (!domain) {
+    return "Please write your email correctly (e.g. name@gmail.com)";
+  }
+
+  const typoFix = COMMON_DOMAIN_TYPOS[domain];
+  if (typoFix) {
+    return "Please write your email correctly";
+  }
+
+  if (!ALLOWED_EMAIL_DOMAINS.has(domain)) {
+    return "Please write your email correctly (e.g. name@gmail.com or name@outlook.com)";
+  }
+
+  return null;
+}
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -59,6 +132,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addressError, setAddressError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [draftReady, setDraftReady] = useState(mode !== "signup");
 
@@ -153,6 +227,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     e.preventDefault();
     setError(null);
     setAddressError(null);
+    setEmailError(null);
     setLoading(true);
     let keepAuthLoader = false;
 
@@ -162,6 +237,13 @@ export function AuthForm({ mode }: AuthFormProps) {
       if (mode === "signup") {
         if (!address.trim()) {
           setAddressError("This field must be filled");
+          setLoading(false);
+          return;
+        }
+
+        const emailValidationError = getEmailValidationError(email);
+        if (emailValidationError) {
+          setEmailError(emailValidationError);
           setLoading(false);
           return;
         }
@@ -415,11 +497,19 @@ export function AuthForm({ mode }: AuthFormProps) {
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) setEmailError(null);
+              }}
+              className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${
+                emailError ? "border-danger" : "border-line"
+              }`}
               placeholder="you@email.com"
               autoComplete="email"
             />
+            {emailError && (
+              <p className="text-sm font-medium text-danger">{emailError}</p>
+            )}
           </label>
 
           <label className="block space-y-1.5">
