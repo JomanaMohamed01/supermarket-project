@@ -75,7 +75,7 @@ export function SiteHeader({
   ) : null;
 
   return (
-    <header className="relative z-10 border-b border-line/80 bg-cream/70 backdrop-blur-md">
+    <header className="relative z-10 border-b border-line/80 bg-cream">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <Link href="/categories" className="group flex items-center gap-3">
           <span className="brand-mark grid h-10 w-10 place-items-center rounded-2xl bg-leaf text-lg font-bold text-cream shadow-[var(--shadow)]">

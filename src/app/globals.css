@@ -37,6 +37,8 @@ html {
   scroll-behavior: smooth;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Legacy Edge */
+  min-height: 100%;
+  background-color: var(--cream);
 }
 
 html::-webkit-scrollbar {
@@ -45,12 +47,11 @@ html::-webkit-scrollbar {
 
 body {
   margin: 0;
+  min-height: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--ink);
-  background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(64, 145, 108, 0.18), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(233, 168, 37, 0.16), transparent 50%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+  background-color: var(--cream);
   font-family: var(--font-nunito), system-ui, sans-serif;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -61,14 +62,7 @@ body::-webkit-scrollbar {
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
-  mix-blend-mode: soft-light;
-  z-index: 0;
+  content: none;
 }
 
 @layer base {
