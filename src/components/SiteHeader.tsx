@@ -168,7 +168,7 @@ export function SiteHeader({
                   <button
                     type="button"
                     onClick={signOut}
-                    className="w-full rounded-xl px-3 py-3 text-left text-sm font-semibold tracking-wide text-ink transition hover:bg-bg-deep hover:text-leaf"
+                    className="block w-full rounded-xl px-3 py-3 text-left text-sm leading-5 font-semibold tracking-wide text-ink transition hover:bg-bg-deep hover:text-leaf"
                   >
                     Sign out
                   </button>
