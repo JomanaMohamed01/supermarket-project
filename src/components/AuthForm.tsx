@@ -274,8 +274,8 @@ export function AuthForm({ mode }: AuthFormProps) {
           return;
         }
 
-        if (getPasswordStrength(password) === "weak") {
-          setError("Please choose a stronger password");
+        if (getPasswordStrength(password) !== "strong") {
+          setError("Please choose a strong password");
           setLoading(false);
           return;
         }
