@@ -10,6 +10,12 @@ type PageProps = {
   params: Promise<{ id: string }>;
 };
 
+function inLastRow(index: number, total: number, cols: number) {
+  const remainder = total % cols;
+  const lastRowCount = remainder === 0 ? cols : remainder;
+  return index >= total - lastRowCount;
+}
+
 export default async function CategoryProductsPage({ params }: PageProps) {
   const { id } = await params;
   const { supabase } = await requireUser();
@@ -56,10 +62,16 @@ export default async function CategoryProductsPage({ params }: PageProps) {
       )}
 
       <div className="stagger grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((product) => (
+        {list.map((product, index) => (
           <article
             key={product.id}
-            className="flex flex-col justify-between border-b border-line pb-8 last:border-b-0"
+            className={`flex flex-col justify-between border-line pb-8 ${
+              inLastRow(index, list.length, 1) ? "border-b-0" : "border-b"
+            } ${
+              inLastRow(index, list.length, 2) ? "sm:border-b-0" : "sm:border-b"
+            } ${
+              inLastRow(index, list.length, 3) ? "lg:border-b-0" : "lg:border-b"
+            }`}
           >
             <div>
               <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
