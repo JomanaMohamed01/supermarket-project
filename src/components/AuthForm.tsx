@@ -119,6 +119,32 @@ function getEmailValidationError(value: string): string | null {
   return null;
 }
 
+type PasswordStrength = "weak" | "medium" | "strong";
+
+function getPasswordStrength(password: string): PasswordStrength | null {
+  if (!password) return null;
+
+  let score = 0;
+  if (password.length >= 6) score += 1;
+  if (password.length >= 10) score += 1;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+  if (score <= 2) return "weak";
+  if (score <= 3) return "medium";
+  return "strong";
+}
+
+const PASSWORD_STRENGTH_COPY: Record<
+  PasswordStrength,
+  { label: string; className: string }
+> = {
+  weak: { label: "Weak password", className: "text-danger" },
+  medium: { label: "Medium password", className: "text-citrus" },
+  strong: { label: "Strong password", className: "text-leaf" },
+};
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -248,6 +274,12 @@ export function AuthForm({ mode }: AuthFormProps) {
           return;
         }
 
+        if (getPasswordStrength(password) === "weak") {
+          setError("Please choose a stronger password");
+          setLoading(false);
+          return;
+        }
+
         if (avatarFile) {
           if (!avatarFile.type.startsWith("image/")) {
             throw new Error("Profile picture must be an image.");
@@ -350,6 +382,10 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   const isSignup = mode === "signup";
+  const passwordStrength = isSignup ? getPasswordStrength(password) : null;
+  const passwordStrengthUi = passwordStrength
+    ? PASSWORD_STRENGTH_COPY[passwordStrength]
+    : null;
   const initials =
     fullName.trim().charAt(0).toUpperCase() ||
     email.trim().charAt(0).toUpperCase() ||
@@ -520,7 +556,10 @@ export function AuthForm({ mode }: AuthFormProps) {
                 required
                 minLength={6}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (error) setError(null);
+                }}
                 className="w-full rounded-xl border border-line bg-white py-3 pr-11 pl-3.5 outline-none ring-leaf/30 transition focus:ring-2"
                 placeholder="At least 6 characters"
                 autoComplete={isSignup ? "new-password" : "current-password"}
@@ -538,6 +577,11 @@ export function AuthForm({ mode }: AuthFormProps) {
                 )}
               </button>
             </div>
+            {passwordStrengthUi && (
+              <p className={`text-sm font-medium ${passwordStrengthUi.className}`}>
+                {passwordStrengthUi.label}
+              </p>
+            )}
           </label>
 
           {error && (
