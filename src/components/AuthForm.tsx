@@ -305,7 +305,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           {isSignup ? "Already shopping with us?" : "New here?"}{" "}
           <Link
             href={isSignup ? "/login" : "/signup"}
-            className="font-semibold text-leaf"
+            className="font-semibold text-leaf underline-offset-2 hover:underline"
           >
             {isSignup ? "Sign in" : "Sign up"}
           </Link>
