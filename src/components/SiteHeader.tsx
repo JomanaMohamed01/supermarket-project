@@ -34,17 +34,13 @@ export function SiteHeader({
     router.refresh();
   }
 
-  const linkClass = (href: string) =>
-    `text-sm leading-5 font-semibold tracking-wide transition ${
-      pathname.startsWith(href)
-        ? "text-leaf"
-        : "text-ink hover:text-leaf"
-    }`;
+  const linkClass =
+    "text-sm leading-5 font-semibold tracking-wide text-ink transition hover:text-leaf";
 
   const mobileLinkClass = (href: string) =>
     `block rounded-xl px-3 py-3 text-sm leading-5 font-semibold tracking-wide transition ${
       pathname.startsWith(href)
-        ? "bg-bg-deep text-leaf"
+        ? "bg-bg-deep text-ink"
         : "text-ink hover:bg-bg-deep hover:text-leaf"
     }`;
 
@@ -95,10 +91,10 @@ export function SiteHeader({
 
         {/* Desktop / tablet nav — above 500px */}
         <nav className="hidden items-center gap-4 min-[501px]:flex sm:gap-6">
-          <Link href="/categories" className={linkClass("/categories")}>
+          <Link href="/categories" className={linkClass}>
             Shop
           </Link>
-          <Link href="/cart" className={`${linkClass("/cart")} relative`}>
+          <Link href="/cart" className={`${linkClass} relative`}>
             Cart
             {cartCount > 0 && (
               <span className="absolute -right-3 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-citrus px-1 text-[10px] font-bold text-ink">
@@ -109,7 +105,7 @@ export function SiteHeader({
           {email && (
             <a
               href="/login"
-              className={linkClass("/__sign-out__")}
+              className={linkClass}
               onClick={(e) => {
                 e.preventDefault();
                 void signOut();
