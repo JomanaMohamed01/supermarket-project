@@ -191,7 +191,7 @@ export function AccountClient({ profile }: AccountClientProps) {
           </div>
 
           <div className="flex-1 text-center sm:text-left">
-            <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
+            <h2 className="font-[family-name:var(--font-nunito)] text-2xl font-bold text-ink">
               {profile.fullName?.trim() || "Your profile"}
             </h2>
             <p className="mt-1 text-sm text-ink-soft">
