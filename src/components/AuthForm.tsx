@@ -11,6 +11,41 @@ type AuthFormProps = {
   mode: "login" | "signup";
 };
 
+const SIGNUP_DRAFT_KEY = "freshlane_signup_draft";
+
+type SignupDraft = {
+  fullName: string;
+  phone: string;
+  address: string;
+  email: string;
+  avatarDataUrl?: string | null;
+  avatarName?: string | null;
+  avatarType?: string | null;
+};
+
+function dataUrlToFile(dataUrl: string, name: string, type: string) {
+  const [header, base64] = dataUrl.split(",");
+  if (!header || !base64) return null;
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new File([bytes], name, { type });
+}
+
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject(new Error("Could not read file"));
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("Could not read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -25,6 +60,84 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [addressError, setAddressError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [draftReady, setDraftReady] = useState(mode !== "signup");
+
+  useEffect(() => {
+    if (mode !== "signup") return;
+
+    try {
+      const raw = sessionStorage.getItem(SIGNUP_DRAFT_KEY);
+      if (raw) {
+        const draft = JSON.parse(raw) as SignupDraft;
+        setFullName(draft.fullName ?? "");
+        setPhone(draft.phone ?? "");
+        setAddress(draft.address ?? "");
+        setEmail(draft.email ?? "");
+
+        if (draft.avatarDataUrl && draft.avatarName && draft.avatarType) {
+          const file = dataUrlToFile(
+            draft.avatarDataUrl,
+            draft.avatarName,
+            draft.avatarType,
+          );
+          if (file) setAvatarFile(file);
+        }
+      }
+    } catch {
+      sessionStorage.removeItem(SIGNUP_DRAFT_KEY);
+    } finally {
+      setDraftReady(true);
+    }
+  }, [mode]);
+
+  useEffect(() => {
+    if (mode !== "signup" || !draftReady) return;
+
+    let cancelled = false;
+
+    async function persistDraft() {
+      const draft: SignupDraft = {
+        fullName,
+        phone,
+        address,
+        email,
+        avatarDataUrl: null,
+        avatarName: null,
+        avatarType: null,
+      };
+
+      if (avatarFile) {
+        try {
+          draft.avatarDataUrl = await fileToDataUrl(avatarFile);
+          draft.avatarName = avatarFile.name;
+          draft.avatarType = avatarFile.type;
+        } catch {
+          // Keep text fields even if the avatar cannot be serialized.
+        }
+      }
+
+      if (cancelled) return;
+
+      const hasContent =
+        Boolean(draft.fullName.trim()) ||
+        Boolean(draft.phone.trim()) ||
+        Boolean(draft.address.trim()) ||
+        Boolean(draft.email.trim()) ||
+        Boolean(draft.avatarDataUrl);
+
+      if (hasContent) {
+        sessionStorage.setItem(SIGNUP_DRAFT_KEY, JSON.stringify(draft));
+      } else {
+        sessionStorage.removeItem(SIGNUP_DRAFT_KEY);
+      }
+    }
+
+    void persistDraft();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, draftReady, fullName, phone, address, email, avatarFile]);
 
   useEffect(() => {
     if (!avatarFile) {
@@ -104,6 +217,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           if (profileError) throw profileError;
         }
 
+        sessionStorage.removeItem(SIGNUP_DRAFT_KEY);
         keepAuthLoader = true;
       } else {
         const { data: signInData, error: signInError } =
