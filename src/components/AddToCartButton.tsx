@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
 type AddToCartButtonProps = {
@@ -11,11 +12,39 @@ type AddToCartButtonProps = {
 export function AddToCartButton({ productId }: AddToCartButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [toast, setToast] = useState<{
+    text: string;
+    tone: "success" | "error";
+  } | null>(null);
+  const [phase, setPhase] = useState<"hidden" | "in" | "out">("hidden");
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  function clearTimers() {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }
+
+  function showToast(text: string, tone: "success" | "error" = "success") {
+    clearTimers();
+    setToast({ text, tone });
+    setPhase("in");
+    timersRef.current.push(setTimeout(() => setPhase("out"), 2200));
+    timersRef.current.push(
+      setTimeout(() => {
+        setPhase("hidden");
+        setToast(null);
+      }, 2700),
+    );
+  }
+
+  useEffect(() => {
+    setMounted(true);
+    return () => clearTimers();
+  }, []);
 
   async function addToCart() {
     setLoading(true);
-    setMessage(null);
 
     try {
       const supabase = createClient();
@@ -72,7 +101,7 @@ export function AddToCartButton({ productId }: AddToCartButtonProps) {
         }
       }
 
-      setMessage("Added to cart");
+      showToast("Added to cart");
       router.refresh();
     } catch (err) {
       const message =
@@ -81,14 +110,30 @@ export function AddToCartButton({ productId }: AddToCartButtonProps) {
           : err instanceof Error
             ? err.message
             : "Could not add item";
-      setMessage(message);
+      showToast(message, "error");
     } finally {
       setLoading(false);
     }
   }
 
+  const toastNode =
+    toast && phase !== "hidden" ? (
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-[110] flex justify-center px-4 pt-5 sm:pt-6">
+        <div
+          role="status"
+          className={`rounded-2xl border px-5 py-3 text-sm font-semibold shadow-[var(--shadow)] sm:text-base ${
+            toast.tone === "success"
+              ? "border-leaf/20 bg-leaf text-cream"
+              : "border-danger/20 bg-danger text-cream"
+          } ${phase === "in" ? "welcome-toast-in" : "welcome-toast-out"}`}
+        >
+          {toast.text}
+        </div>
+      </div>
+    ) : null;
+
   return (
-    <div className="space-y-2">
+    <>
       <button
         type="button"
         onClick={addToCart}
@@ -97,7 +142,8 @@ export function AddToCartButton({ productId }: AddToCartButtonProps) {
       >
         {loading ? "Adding..." : "Add to cart"}
       </button>
-      {message && <p className="text-xs text-ink-soft">{message}</p>}
-    </div>
+
+      {mounted && toastNode ? createPortal(toastNode, document.body) : null}
+    </>
   );
 }
