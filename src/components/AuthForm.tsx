@@ -157,8 +157,11 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fullNameError, setFullNameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
   const [addressError, setAddressError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [draftReady, setDraftReady] = useState(mode !== "signup");
 
@@ -252,17 +255,44 @@ export function AuthForm({ mode }: AuthFormProps) {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setFullNameError(null);
+    setPhoneError(null);
     setAddressError(null);
     setEmailError(null);
+    setPasswordError(null);
     setLoading(true);
     let keepAuthLoader = false;
+
+    const requiredMessage = "This field needs to be filled";
 
     try {
       const supabase = createClient();
 
       if (mode === "signup") {
+        let hasEmptyField = false;
+
+        if (!fullName.trim()) {
+          setFullNameError(requiredMessage);
+          hasEmptyField = true;
+        }
+        if (!phone.trim()) {
+          setPhoneError(requiredMessage);
+          hasEmptyField = true;
+        }
         if (!address.trim()) {
-          setAddressError("This field must be filled");
+          setAddressError(requiredMessage);
+          hasEmptyField = true;
+        }
+        if (!email.trim()) {
+          setEmailError(requiredMessage);
+          hasEmptyField = true;
+        }
+        if (!password) {
+          setPasswordError(requiredMessage);
+          hasEmptyField = true;
+        }
+
+        if (hasEmptyField) {
           setLoading(false);
           return;
         }
@@ -275,7 +305,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         }
 
         if (getPasswordStrength(password) !== "strong") {
-          setError("Please choose a strong password");
+          setPasswordError("Please choose a strong password");
           setLoading(false);
           return;
         }
@@ -323,8 +353,8 @@ export function AuthForm({ mode }: AuthFormProps) {
 
           const { error: profileError } = await supabase.from("profiles").upsert({
             id: data.user.id,
-            full_name: fullName || null,
-            phone: phone || null,
+            full_name: fullName.trim(),
+            phone: phone.trim(),
             address: address.trim(),
             ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
           });
@@ -334,6 +364,20 @@ export function AuthForm({ mode }: AuthFormProps) {
         sessionStorage.removeItem(SIGNUP_DRAFT_KEY);
         keepAuthLoader = true;
       } else {
+        let hasEmptyField = false;
+        if (!email.trim()) {
+          setEmailError(requiredMessage);
+          hasEmptyField = true;
+        }
+        if (!password) {
+          setPasswordError(requiredMessage);
+          hasEmptyField = true;
+        }
+        if (hasEmptyField) {
+          setLoading(false);
+          return;
+        }
+
         const { data: signInData, error: signInError } =
           await supabase.auth.signInWithPassword({
             email,
@@ -429,7 +473,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </Link>
         </p>
 
-        <form onSubmit={onSubmit} className="mt-8 space-y-4">
+        <form onSubmit={onSubmit} noValidate className="mt-8 space-y-4">
           {isSignup && (
             <>
               <div className="flex items-center gap-4">
@@ -487,11 +531,19 @@ export function AuthForm({ mode }: AuthFormProps) {
                 <span className="text-sm font-semibold text-ink-soft">Full name</span>
                 <input
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    if (fullNameError) setFullNameError(null);
+                  }}
+                  className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${
+                    fullNameError ? "border-danger" : "border-line"
+                  }`}
                   placeholder="Your name"
                   autoComplete="name"
                 />
+                {fullNameError && (
+                  <p className="text-sm font-medium text-danger">{fullNameError}</p>
+                )}
               </label>
 
               <label className="block space-y-1.5">
@@ -499,11 +551,19 @@ export function AuthForm({ mode }: AuthFormProps) {
                 <input
                   type="tel"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-xl border border-line bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2"
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    if (phoneError) setPhoneError(null);
+                  }}
+                  className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${
+                    phoneError ? "border-danger" : "border-line"
+                  }`}
                   placeholder="e.g. 05XXXXXXXX"
                   autoComplete="tel"
                 />
+                {phoneError && (
+                  <p className="text-sm font-medium text-danger">{phoneError}</p>
+                )}
               </label>
 
               <label className="block space-y-1.5">
@@ -531,7 +591,6 @@ export function AuthForm({ mode }: AuthFormProps) {
             <span className="text-sm font-semibold text-ink-soft">Email</span>
             <input
               type="email"
-              required
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -553,14 +612,15 @@ export function AuthForm({ mode }: AuthFormProps) {
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                required
-                minLength={6}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
+                  if (passwordError) setPasswordError(null);
                   if (error) setError(null);
                 }}
-                className="w-full rounded-xl border border-line bg-white py-3 pr-11 pl-3.5 outline-none ring-leaf/30 transition focus:ring-2"
+                className={`w-full rounded-xl border bg-white py-3 pr-11 pl-3.5 outline-none ring-leaf/30 transition focus:ring-2 ${
+                  passwordError ? "border-danger" : "border-line"
+                }`}
                 placeholder="At least 6 characters"
                 autoComplete={isSignup ? "new-password" : "current-password"}
               />
@@ -577,7 +637,10 @@ export function AuthForm({ mode }: AuthFormProps) {
                 )}
               </button>
             </div>
-            {passwordStrengthUi && (
+            {passwordError && (
+              <p className="text-sm font-medium text-danger">{passwordError}</p>
+            )}
+            {!passwordError && passwordStrengthUi && (
               <p className={`text-sm font-medium ${passwordStrengthUi.className}`}>
                 {passwordStrengthUi.label}
               </p>
