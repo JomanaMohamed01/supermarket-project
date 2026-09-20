@@ -97,23 +97,23 @@ function getEmailDomain(value: string) {
 
 function getEmailValidationError(value: string): string | null {
   const email = value.trim();
+  const invalidMessage = "Email must be written correctly";
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-    return "Please write your email correctly (e.g. name@gmail.com)";
+    return invalidMessage;
   }
 
   const domain = getEmailDomain(email);
   if (!domain) {
-    return "Please write your email correctly (e.g. name@gmail.com)";
+    return invalidMessage;
   }
 
-  const typoFix = COMMON_DOMAIN_TYPOS[domain];
-  if (typoFix) {
-    return "Please write your email correctly";
+  if (COMMON_DOMAIN_TYPOS[domain]) {
+    return invalidMessage;
   }
 
   if (!ALLOWED_EMAIL_DOMAINS.has(domain)) {
-    return "Please write your email correctly (e.g. name@gmail.com or name@outlook.com)";
+    return invalidMessage;
   }
 
   return null;
