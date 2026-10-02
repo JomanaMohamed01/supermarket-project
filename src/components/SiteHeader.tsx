@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type SiteHeaderProps = {
@@ -21,10 +21,32 @@ export function SiteHeader({
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function onPointerDown(event: MouseEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   async function signOut() {
     setMenuOpen(false);
@@ -34,45 +56,18 @@ export function SiteHeader({
     router.refresh();
   }
 
-  const linkClass =
-    "text-sm leading-5 font-semibold tracking-wide text-ink transition hover:text-leaf";
-
-  const mobileLinkClass = (href: string) =>
-    `block rounded-xl px-3 py-3 text-sm leading-5 font-semibold tracking-wide transition ${
-      pathname.startsWith(href)
-        ? "bg-bg-deep text-ink"
-        : "text-ink hover:bg-bg-deep hover:text-leaf"
-    }`;
-
   const initials =
     fullName?.trim()?.charAt(0)?.toUpperCase() ||
     email?.charAt(0)?.toUpperCase() ||
     "U";
 
-  const accountAvatar = email ? (
-    <Link
-      href="/account"
-      aria-label="My account"
-      title="My account"
-      className={`relative grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full border transition ${
-        pathname.startsWith("/account")
-          ? "border-leaf ring-2 ring-leaf/25"
-          : "border-line hover:border-leaf/40"
-      }`}
-    >
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt=""
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <span className="grid h-full w-full place-items-center bg-bg-deep text-sm font-bold text-leaf">
-          {initials}
-        </span>
-      )}
-    </Link>
-  ) : null;
+  function itemClass(active: boolean) {
+    return `block w-full rounded-xl px-3 py-2.5 text-left text-sm leading-5 font-semibold tracking-wide transition ${
+      active
+        ? "bg-bg-deep text-ink"
+        : "text-ink hover:bg-bg-deep hover:text-leaf"
+    }`;
+  }
 
   return (
     <header className="relative z-10 border-b border-line/80 bg-cream">
@@ -89,58 +84,32 @@ export function SiteHeader({
           </div>
         </Link>
 
-        {/* Desktop / tablet nav — above 500px */}
-        <nav className="hidden items-center gap-4 min-[501px]:flex sm:gap-6">
-          <Link href="/categories" className={linkClass}>
-            Shop
-          </Link>
-          <Link href="/cart" className={`${linkClass} relative`}>
-            Cart
-            {cartCount > 0 && (
-              <span className="absolute -right-3 -top-2 grid h-5 min-w-5 place-items-center rounded-full bg-citrus px-1 text-[10px] font-bold text-ink">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-          {email && (
-            <a
-              href="/login"
-              className={linkClass}
-              onClick={(e) => {
-                e.preventDefault();
-                void signOut();
-              }}
-            >
-              Sign out
-            </a>
-          )}
-          {accountAvatar}
-        </nav>
-
-        {/* Mobile — 500px and below */}
-        <div className="flex items-center gap-2 max-[500px]:flex min-[501px]:hidden">
-          {accountAvatar}
-          <div className="relative">
+        {email && (
+          <div className="relative" ref={menuRef}>
             <button
               type="button"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-label="Account menu"
+              aria-haspopup="menu"
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((open) => !open)}
-              className="relative grid h-10 w-10 place-items-center rounded-xl border border-line bg-cream text-ink transition hover:border-leaf/40"
+              className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-full border transition ${
+                menuOpen || pathname.startsWith("/account")
+                  ? "border-leaf ring-2 ring-leaf/25"
+                  : "border-line hover:border-leaf/40"
+              }`}
             >
-              <span className="sr-only">Menu</span>
-              <span className="flex w-4 flex-col gap-1">
-                <span
-                  className={`h-0.5 w-full rounded-full bg-ink transition ${menuOpen ? "translate-y-1.5 rotate-45" : ""}`}
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  className="h-full w-full rounded-full object-cover"
                 />
-                <span
-                  className={`h-0.5 w-full rounded-full bg-ink transition ${menuOpen ? "opacity-0" : ""}`}
-                />
-                <span
-                  className={`h-0.5 w-full rounded-full bg-ink transition ${menuOpen ? "-translate-y-1.5 -rotate-45" : ""}`}
-                />
-              </span>
-              {cartCount > 0 && !menuOpen && (
+              ) : (
+                <span className="grid h-full w-full place-items-center rounded-full bg-bg-deep text-sm font-bold text-leaf">
+                  {initials}
+                </span>
+              )}
+              {cartCount > 0 && (
                 <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-citrus px-0.5 text-[9px] font-bold text-ink">
                   {cartCount}
                 </span>
@@ -148,35 +117,53 @@ export function SiteHeader({
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 z-20 mt-2 flex w-44 animate-fade flex-col gap-1 rounded-2xl border border-line bg-cream p-2 shadow-[var(--shadow)]">
+              <div
+                role="menu"
+                className="absolute right-0 z-20 mt-2 w-48 animate-fade rounded-2xl border border-line bg-cream p-2 shadow-[var(--shadow)]"
+              >
                 <Link
                   href="/categories"
-                  className={mobileLinkClass("/categories")}
+                  role="menuitem"
+                  className={itemClass(pathname.startsWith("/categories"))}
                   onClick={() => setMenuOpen(false)}
                 >
                   Shop
                 </Link>
                 <Link
                   href="/cart"
-                  className={mobileLinkClass("/cart")}
+                  role="menuitem"
+                  className={itemClass(pathname.startsWith("/cart"))}
                   onClick={() => setMenuOpen(false)}
                 >
-                  Cart
-                  {cartCount > 0 ? ` (${cartCount})` : ""}
+                  <span className="flex items-center justify-between gap-3">
+                    Cart
+                    {cartCount > 0 && (
+                      <span className="grid h-5 min-w-5 place-items-center rounded-full bg-citrus px-1 text-[10px] font-bold text-ink">
+                        {cartCount}
+                      </span>
+                    )}
+                  </span>
                 </Link>
-                {email && (
-                  <button
-                    type="button"
-                    onClick={signOut}
-                    className="block w-full rounded-xl px-3 py-3 text-left text-sm leading-5 font-semibold tracking-wide text-ink transition hover:bg-bg-deep hover:text-leaf"
-                  >
-                    Sign out
-                  </button>
-                )}
+                <Link
+                  href="/account"
+                  role="menuitem"
+                  className={itemClass(pathname.startsWith("/account"))}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  My profile
+                </Link>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => void signOut()}
+                  className={itemClass(false)}
+                >
+                  Sign out
+                </button>
               </div>
             )}
           </div>
-        </div>
+        )}
       </div>
     </header>
   );
