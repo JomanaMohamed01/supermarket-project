@@ -22,7 +22,7 @@ const imagesByName: Record<string, string> = {
   shrimp: "/images/fish/shrimp.jpg",
   "tuna steak": "/images/fish/tuna-steak.jpg",
   "canned beans": "/images/canned-food/beans.jpg",
-  "canned corn": "/images/canned-food/corn.jpg",
+  "canned corn": "/images/canned-food/corn-2.jpg",
   "canned tuna": "/images/canned-food/tuna.jpg",
   "tomato paste": "/images/canned-food/tomato-paste.jpg",
   "cat wet food": "/images/pet-foods/cat-wet-food.jpg",
