@@ -28,6 +28,10 @@ export function AccountClient({ profile }: AccountClientProps) {
   const [savingAddress, setSavingAddress] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [addressToast, setAddressToast] = useState<"hidden" | "in" | "out">(
+    "hidden",
+  );
+  const addressToastTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [addressError, setAddressError] = useState<string | null>(null);
   const [deletingAccount, setDeletingAccount] = useState(false);
@@ -36,7 +40,22 @@ export function AccountClient({ profile }: AccountClientProps) {
 
   useEffect(() => {
     setPortalReady(true);
+    return () => {
+      addressToastTimers.current.forEach(clearTimeout);
+    };
   }, []);
+
+  function showAddressToast() {
+    addressToastTimers.current.forEach(clearTimeout);
+    addressToastTimers.current = [];
+    setAddressToast("in");
+    addressToastTimers.current.push(
+      setTimeout(() => setAddressToast("out"), 3500),
+    );
+    addressToastTimers.current.push(
+      setTimeout(() => setAddressToast("hidden"), 4000),
+    );
+  }
 
   useEffect(() => {
     if (!confirmDeleteOpen) return;
@@ -73,7 +92,7 @@ export function AccountClient({ profile }: AccountClientProps) {
 
       if (updateError) throw updateError;
 
-      setMessage("Address updated.");
+      showAddressToast();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not update address");
@@ -171,8 +190,25 @@ export function AccountClient({ profile }: AccountClientProps) {
     }
   }
 
+  const addressToastNode =
+    addressToast !== "hidden" ? (
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-[110] flex justify-center px-4 pt-4 sm:pt-5">
+        <div
+          role="status"
+          className={`welcome-toast rounded-2xl border border-leaf/20 bg-leaf px-5 py-3 text-sm font-semibold text-cream shadow-[var(--shadow)] sm:text-base ${
+            addressToast === "in" ? "welcome-toast-in" : "welcome-toast-out"
+          }`}
+        >
+          Address updated successfully.
+        </div>
+      </div>
+    ) : null;
+
   return (
     <div className="mx-auto max-w-xl space-y-8">
+      {portalReady && addressToastNode
+        ? createPortal(addressToastNode, document.body)
+        : null}
       {deletingAccount && <ActionLoader message="Deleting account..." />}
       <div className="rounded-[1.5rem] border border-line bg-cream/90 p-6 shadow-[var(--shadow)] sm:p-8">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
