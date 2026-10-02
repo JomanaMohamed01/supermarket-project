@@ -15,7 +15,7 @@ const imagesByName: Record<string, string> = {
   "minced beef": "/images/meat/minced-beef.jpg",
   "chicken breast": "/images/chicken/chicken-breast.jpg",
   "chicken thighs": "/images/chicken/chicken-thighs.jpg",
-  "chicken wings": "/images/chicken/chicken-wings.jpg",
+  "chicken wings": "/images/chicken/chicken-wings-2.jpg",
   "whole chicken": "/images/chicken/whole-chicken.jpg",
   "cod fillet": "/images/fish/cod-fillet.jpg",
   "salmon fillet": "/images/fish/salmon-fillet.jpg",
