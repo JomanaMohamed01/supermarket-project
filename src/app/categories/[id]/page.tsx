@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/AddToCartButton";
 import { AppShell } from "@/components/AppShell";
+import { ProductImage } from "@/components/ProductImage";
 import { requireUser } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
 import type { Category, Product } from "@/lib/types";
@@ -74,6 +75,7 @@ export default async function CategoryProductsPage({ params }: PageProps) {
             }`}
           >
             <div>
+              <ProductImage name={product.name} imageUrl={product.image_url} />
               <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
                 {product.name}
               </h2>

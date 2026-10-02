@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ProductImage } from "@/components/ProductImage";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/format";
 import type { Product } from "@/lib/types";
@@ -111,13 +112,20 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
         {items.map((item) => (
           <li
             key={item.id}
-            className="flex items-start justify-between gap-4 border-b border-line pb-4 text-left"
+            className="flex items-center justify-between gap-4 border-b border-line pb-4 text-left"
           >
-            <div>
-              <p className="font-semibold text-ink">{item.product.name}</p>
-              <p className="text-sm text-ink-soft">
-                {item.quantity} × {formatMoney(Number(item.product.price))}
-              </p>
+            <div className="flex items-center gap-3">
+              <ProductImage
+                name={item.product.name}
+                imageUrl={item.product.image_url}
+                size="row"
+              />
+              <div>
+                <p className="font-semibold text-ink">{item.product.name}</p>
+                <p className="text-sm text-ink-soft">
+                  {item.quantity} × {formatMoney(Number(item.product.price))}
+                </p>
+              </div>
             </div>
             <p className="font-semibold text-ink">
               {formatMoney(Number(item.product.price) * item.quantity)}

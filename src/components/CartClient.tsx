@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ActionLoader } from "@/components/ActionLoader";
+import { ProductImage } from "@/components/ProductImage";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/format";
 import type { Product } from "@/lib/types";
@@ -132,17 +133,24 @@ export function CartClient({ items }: { items: CartRow[] }) {
               key={item.id}
               className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between"
             >
-              <div>
-                <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
-                  {item.product.name}
-                </h2>
-                <p className="mt-1 text-sm text-ink-soft">
-                  {formatMoney(Number(item.product.price))}
-                  {item.product.unit ? ` / ${item.product.unit}` : ""}
-                </p>
-                <p className="mt-2 font-semibold text-leaf">
-                  Line: {formatMoney(Number(item.product.price) * item.quantity)}
-                </p>
+              <div className="flex items-center gap-4">
+                <ProductImage
+                  name={item.product.name}
+                  imageUrl={item.product.image_url}
+                  size="row"
+                />
+                <div>
+                  <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink">
+                    {item.product.name}
+                  </h2>
+                  <p className="mt-1 text-sm text-ink-soft">
+                    {formatMoney(Number(item.product.price))}
+                    {item.product.unit ? ` / ${item.product.unit}` : ""}
+                  </p>
+                  <p className="mt-2 font-semibold text-leaf">
+                    Line: {formatMoney(Number(item.product.price) * item.quantity)}
+                  </p>
+                </div>
               </div>
 
               <div className="flex items-center gap-3">
