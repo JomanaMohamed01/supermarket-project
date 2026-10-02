@@ -119,7 +119,7 @@ export function SiteHeader({
             {menuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 z-20 mt-2 w-48 animate-fade rounded-2xl border border-line bg-cream p-2 shadow-[var(--shadow)]"
+                className="absolute right-0 z-20 mt-2 flex w-48 animate-fade flex-col gap-1 rounded-2xl border border-line bg-cream p-2 shadow-[var(--shadow)]"
               >
                 <Link
                   href="/categories"
