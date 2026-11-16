@@ -167,6 +167,8 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [emailEditable, setEmailEditable] = useState(mode !== "login");
+  const [passwordEditable, setPasswordEditable] = useState(mode !== "login");
   const [draftReady, setDraftReady] = useState(mode !== "signup");
 
   useEffect(() => {
@@ -485,7 +487,34 @@ export function AuthForm({ mode }: AuthFormProps) {
             </Link>
           </p>
 
-          <form onSubmit={onSubmit} noValidate className="mt-8 space-y-4">
+          <form
+            onSubmit={onSubmit}
+            noValidate
+            autoComplete={isSignup ? "on" : "off"}
+            className="mt-8 space-y-4"
+          >
+            {!isSignup && (
+              <>
+                <input
+                  type="text"
+                  name="username"
+                  autoComplete="username"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  defaultValue=""
+                  className="pointer-events-none absolute h-0 w-0 opacity-0"
+                />
+                <input
+                  type="password"
+                  name="password"
+                  autoComplete="current-password"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  defaultValue=""
+                  className="pointer-events-none absolute h-0 w-0 opacity-0"
+                />
+              </>
+            )}
             {isSignup && (
               <>
                 <div className="flex items-center gap-4">
@@ -607,8 +636,16 @@ export function AuthForm({ mode }: AuthFormProps) {
                 }}
                 className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${emailError ? "border-danger" : "border-line"
                   }`}
-                placeholder="you@email.com"
-                autoComplete="email"
+                placeholder={isSignup ? "you@email.com" : undefined}
+                autoComplete={isSignup ? "email" : "off"}
+                name={isSignup ? "email" : "signin-email"}
+                readOnly={!isSignup && !emailEditable}
+                onPointerDown={() => {
+                  if (!isSignup) setEmailEditable(true);
+                }}
+                onFocus={() => {
+                  if (!isSignup) setEmailEditable(true);
+                }}
               />
               {emailError && (
                 <p className="text-sm font-medium text-danger">{emailError}</p>
@@ -628,8 +665,16 @@ export function AuthForm({ mode }: AuthFormProps) {
                   }}
                   className={`w-full rounded-xl border bg-white py-3 pr-11 pl-3.5 outline-none ring-leaf/30 transition focus:ring-2 ${passwordError ? "border-danger" : "border-line"
                     }`}
-                  placeholder="At least 6 characters"
-                  autoComplete={isSignup ? "new-password" : "current-password"}
+                  placeholder={isSignup ? "At least 6 characters" : undefined}
+                  autoComplete={isSignup ? "new-password" : "off"}
+                  name={isSignup ? "new-password" : "signin-secret"}
+                  readOnly={!isSignup && !passwordEditable}
+                  onPointerDown={() => {
+                    if (!isSignup) setPasswordEditable(true);
+                  }}
+                  onFocus={() => {
+                    if (!isSignup) setPasswordEditable(true);
+                  }}
                 />
                 <button
                   type="button"
