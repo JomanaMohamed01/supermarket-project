@@ -18,7 +18,7 @@ export default async function AccountPage() {
           Account
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-fraunces)] text-4xl font-semibold text-ink">
-          My account
+          My profile
         </h1>
         <p className="mt-2 text-ink-soft">
           View your details, update your address, and add a profile picture.
