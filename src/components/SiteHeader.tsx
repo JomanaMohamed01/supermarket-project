@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 
 type SiteHeaderProps = {
@@ -21,7 +22,14 @@ export function SiteHeader({
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmSignOut, setConfirmSignOut] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   useEffect(() => {
     setMenuOpen(false);
@@ -48,12 +56,34 @@ export function SiteHeader({
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!confirmSignOut) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !signingOut) setConfirmSignOut(false);
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [confirmSignOut, signingOut]);
+
   async function signOut() {
-    setMenuOpen(false);
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
+    setSigningOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      setMenuOpen(false);
+      setConfirmSignOut(false);
+      router.push("/login");
+      router.refresh();
+    } finally {
+      setSigningOut(false);
+    }
   }
 
   const initials =
@@ -155,7 +185,10 @@ export function SiteHeader({
                 <button
                   type="button"
                   role="menuitem"
-                  onClick={() => void signOut()}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setConfirmSignOut(true);
+                  }}
                   className={itemClass(false)}
                 >
                   Sign out
@@ -165,6 +198,50 @@ export function SiteHeader({
           </div>
         )}
       </div>
+      {portalReady &&
+        confirmSignOut &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-ink/45 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="sign-out-title"
+            onClick={() => {
+              if (!signingOut) setConfirmSignOut(false);
+            }}
+          >
+            <div
+              className="animate-fade w-full max-w-sm rounded-[1.5rem] border border-line bg-cream p-6 shadow-[var(--shadow)] sm:p-7"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <h2
+                id="sign-out-title"
+                className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold text-ink"
+              >
+                Do you want to sign out?
+              </h2>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  disabled={signingOut}
+                  onClick={() => setConfirmSignOut(false)}
+                  className="rounded-xl border border-line bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-bg-deep disabled:opacity-60"
+                >
+                  No
+                </button>
+                <button
+                  type="button"
+                  disabled={signingOut}
+                  onClick={() => void signOut()}
+                  className="rounded-xl bg-leaf px-4 py-3 text-sm font-semibold text-cream transition hover:bg-leaf-bright disabled:opacity-60"
+                >
+                  {signingOut ? "Signing out..." : "Yes"}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </header>
   );
 }
