@@ -578,7 +578,6 @@ export function AuthForm({ mode }: AuthFormProps) {
                     }}
                     className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${fullNameError ? "border-danger" : "border-line"
                       }`}
-                    placeholder="Your name"
                     autoComplete="name"
                   />
                   {fullNameError && (
@@ -597,7 +596,6 @@ export function AuthForm({ mode }: AuthFormProps) {
                     }}
                     className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${phoneError ? "border-danger" : "border-line"
                       }`}
-                    placeholder="e.g. 05XXXXXXXX"
                     autoComplete="tel"
                   />
                   {phoneError && (
@@ -615,7 +613,6 @@ export function AuthForm({ mode }: AuthFormProps) {
                     }}
                     className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${addressError ? "border-danger" : "border-line"
                       }`}
-                    placeholder="Street, city"
                     autoComplete="street-address"
                   />
                   {addressError && (
@@ -636,7 +633,6 @@ export function AuthForm({ mode }: AuthFormProps) {
                 }}
                 className={`w-full rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${emailError ? "border-danger" : "border-line"
                   }`}
-                placeholder={isSignup ? "you@email.com" : undefined}
                 autoComplete={isSignup ? "email" : "off"}
                 name={isSignup ? "email" : "signin-email"}
                 readOnly={!isSignup && !emailEditable}
@@ -665,7 +661,6 @@ export function AuthForm({ mode }: AuthFormProps) {
                   }}
                   className={`w-full rounded-xl border bg-white py-3 pr-11 pl-3.5 outline-none ring-leaf/30 transition focus:ring-2 ${passwordError ? "border-danger" : "border-line"
                     }`}
-                  placeholder={isSignup ? "At least 6 characters" : undefined}
                   autoComplete={isSignup ? "new-password" : "off"}
                   name={isSignup ? "new-password" : "signin-secret"}
                   readOnly={!isSignup && !passwordEditable}
