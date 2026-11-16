@@ -195,9 +195,8 @@ export function AccountClient({ profile }: AccountClientProps) {
       <div className="pointer-events-none fixed inset-x-0 top-0 z-[110] flex justify-center px-4 pt-4 sm:pt-5">
         <div
           role="status"
-          className={`welcome-toast rounded-2xl border border-leaf/20 bg-leaf px-5 py-3 text-sm font-semibold text-cream shadow-[var(--shadow)] sm:text-base ${
-            addressToast === "in" ? "welcome-toast-in" : "welcome-toast-out"
-          }`}
+          className={`welcome-toast rounded-2xl border border-leaf/20 bg-leaf px-5 py-3 text-sm font-semibold text-cream shadow-[var(--shadow)] sm:text-base ${addressToast === "in" ? "welcome-toast-in" : "welcome-toast-out"
+            }`}
         >
           Address updated successfully.
         </div>
@@ -294,9 +293,8 @@ export function AccountClient({ profile }: AccountClientProps) {
               if (addressError) setAddressError(null);
             }}
             rows={3}
-            className={`w-full resize-none rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${
-              addressError ? "border-danger" : "border-line"
-            }`}
+            className={`w-full resize-none rounded-xl border bg-white px-3.5 py-3 outline-none ring-leaf/30 transition focus:ring-2 ${addressError ? "border-danger" : "border-line"
+              }`}
             placeholder="Street, city"
           />
           {addressError && (
@@ -329,8 +327,7 @@ export function AccountClient({ profile }: AccountClientProps) {
           Delete account
         </h3>
         <p className="mt-2 text-sm text-ink-soft">
-          Permanently delete your account, cart, and profile data. This cannot
-          be undone.
+          Permanently delete your account. This cannot be undone.
         </p>
         <button
           type="button"
