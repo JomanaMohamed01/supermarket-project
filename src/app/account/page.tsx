@@ -15,7 +15,7 @@ export default async function AccountPage() {
     <AppShell>
       <div className="mb-8">
         <p className="text-sm font-semibold tracking-[0.16em] text-leaf uppercase">
-          Account
+          Profile
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-fraunces)] text-4xl font-semibold text-ink">
           My profile
