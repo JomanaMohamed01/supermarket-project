@@ -97,7 +97,7 @@ function getEmailDomain(value: string) {
 
 function getEmailValidationError(value: string): string | null {
   const email = value.trim();
-  const invalidMessage = "Email must be written correctly";
+  const invalidMessage = "Please enter a correct email";
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     return invalidMessage;
@@ -140,6 +140,16 @@ function passwordHasNumberAndSpecialChar(password: string) {
   return /\d/.test(password) && /[^A-Za-z0-9]/.test(password);
 }
 
+function signupEmptyFieldMessage(missing: string[]) {
+  const phrase =
+    missing.length === 1
+      ? missing[0]
+      : missing.length === 2
+        ? `${missing[0]} and ${missing[1]}`
+        : `${missing.slice(0, -1).join(", ")}, and ${missing[missing.length - 1]}`;
+  return `Please enter ${phrase}`;
+}
+
 const PASSWORD_STRENGTH_COPY: Record<
   PasswordStrength,
   { label: string; className: string }
@@ -170,6 +180,25 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [emailEditable, setEmailEditable] = useState(mode !== "login");
   const [passwordEditable, setPasswordEditable] = useState(mode !== "login");
   const [draftReady, setDraftReady] = useState(mode !== "signup");
+  const [fieldNotice, setFieldNotice] = useState<string | null>(null);
+  const [noticePhase, setNoticePhase] = useState<"hidden" | "in" | "out">("hidden");
+  const noticeTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  function showFieldNotice(message: string) {
+    noticeTimers.current.forEach(clearTimeout);
+    noticeTimers.current = [];
+    setFieldNotice(message);
+    setNoticePhase("hidden");
+    noticeTimers.current.push(setTimeout(() => setNoticePhase("in"), 20));
+    noticeTimers.current.push(setTimeout(() => setNoticePhase("out"), 3520));
+    noticeTimers.current.push(setTimeout(() => setNoticePhase("hidden"), 4020));
+  }
+
+  useEffect(() => {
+    return () => {
+      noticeTimers.current.forEach(clearTimeout);
+    };
+  }, []);
 
   useEffect(() => {
     if (mode !== "signup") return;
@@ -275,37 +304,23 @@ export function AuthForm({ mode }: AuthFormProps) {
       const supabase = createClient();
 
       if (mode === "signup") {
-        let hasEmptyField = false;
+        const missingFields = [
+          !fullName.trim() ? "a full name" : null,
+          !phone.trim() ? "a phone number" : null,
+          !address.trim() ? "an address" : null,
+          !email.trim() ? "an email" : null,
+          !password ? "a password" : null,
+        ].filter((field): field is string => field !== null);
 
-        if (!fullName.trim()) {
-          setFullNameError(requiredMessage);
-          hasEmptyField = true;
-        }
-        if (!phone.trim()) {
-          setPhoneError(requiredMessage);
-          hasEmptyField = true;
-        }
-        if (!address.trim()) {
-          setAddressError(requiredMessage);
-          hasEmptyField = true;
-        }
-        if (!email.trim()) {
-          setEmailError(requiredMessage);
-          hasEmptyField = true;
-        }
-        if (!password) {
-          setPasswordError(requiredMessage);
-          hasEmptyField = true;
-        }
-
-        if (hasEmptyField) {
+        if (missingFields.length > 0) {
+          showFieldNotice(signupEmptyFieldMessage(missingFields));
           setLoading(false);
           return;
         }
 
         const emailValidationError = getEmailValidationError(email);
         if (emailValidationError) {
-          setEmailError(emailValidationError);
+          showFieldNotice(emailValidationError);
           setLoading(false);
           return;
         }
@@ -451,6 +466,16 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <>
+      {fieldNotice && noticePhase !== "hidden" && (
+        <div className="pointer-events-none fixed inset-x-0 top-0 z-[110] flex justify-center px-4 pt-4 sm:pt-5">
+          <div
+            role="status"
+            className={`welcome-toast rounded-2xl border border-danger/30 bg-danger px-5 py-3 text-sm font-semibold text-white shadow-[var(--shadow)] sm:text-base ${noticePhase === "in" ? "welcome-toast-in" : "welcome-toast-out"}`}
+          >
+            {fieldNotice}
+          </div>
+        </div>
+      )}
       {loading && (
         <ActionLoader
           message={isSignup ? "Creating account..." : "Signing in..."}
