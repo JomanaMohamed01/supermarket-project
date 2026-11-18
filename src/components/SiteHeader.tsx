@@ -182,6 +182,14 @@ export function SiteHeader({
                 >
                   My profile
                 </Link>
+                <Link
+                  href="/orders"
+                  role="menuitem"
+                  className={itemClass(pathname.startsWith("/orders"))}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  My orders
+                </Link>
                 <button
                   type="button"
                   role="menuitem"
