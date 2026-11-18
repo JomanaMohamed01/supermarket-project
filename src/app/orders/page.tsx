@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
-import { ProductImage } from "@/components/ProductImage";
+import { OrdersList, type OrderCard } from "@/components/OrdersList";
 import { requireUser } from "@/lib/auth";
 import { formatMoney } from "@/lib/format";
 
@@ -110,69 +110,27 @@ export default async function OrdersPage() {
       )}
 
       {orders.length > 0 && (
-        <div className="space-y-5">
-          {orders.map((order) => {
+        <OrdersList
+          orders={orders.map((order) => {
             const items = order.order_items ?? [];
-            return (
-              <article
-                key={order.id}
-                className="rounded-[1.5rem] border border-line bg-cream/90 p-5 shadow-[var(--shadow)] sm:p-6"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line pb-4">
-                  <div>
-                    <p className="text-sm text-ink-soft">
-                      {formatOrderDate(order.created_at)}
-                    </p>
-                    <p className="mt-1 font-[family-name:var(--font-fraunces)] text-3xl font-semibold text-ink">
-                      {formatMoney(Number(order.total_amount))}
-                    </p>
-                  </div>
-                  <span className="rounded-full bg-bg-deep px-3 py-1 text-xs font-semibold tracking-wide text-leaf uppercase">
-                    {statusLabel(order.status)}
-                  </span>
-                </div>
-
-                {items.length > 0 ? (
-                  <ul className="mt-4 space-y-4">
-                    {items.map((item, index) => (
-                      <li
-                        key={`${order.id}-${item.product_id ?? index}`}
-                        className="flex items-center justify-between gap-4"
-                      >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <ProductImage
-                            name={item.product_name}
-                            imageUrl={
-                              item.product_id
-                                ? imageByProductId.get(item.product_id)
-                                : null
-                            }
-                            size="row"
-                          />
-                          <div className="min-w-0">
-                            <p className="font-semibold text-ink">
-                              {item.product_name}
-                            </p>
-                            <p className="text-sm text-ink-soft">
-                              {item.quantity} × {formatMoney(Number(item.unit_price))}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="shrink-0 font-semibold text-ink">
-                          {formatMoney(Number(item.line_total))}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="mt-4 text-sm text-ink-soft">
-                    This order has no saved items.
-                  </p>
-                )}
-              </article>
-            );
+            const card: OrderCard = {
+              id: order.id,
+              date: formatOrderDate(order.created_at),
+              status: statusLabel(order.status),
+              total: formatMoney(Number(order.total_amount)),
+              items: items.map((item, index) => ({
+                key: `${order.id}-${item.product_id ?? index}`,
+                name: item.product_name,
+                detail: `${item.quantity} × ${formatMoney(Number(item.unit_price))}`,
+                lineTotal: formatMoney(Number(item.line_total)),
+                imageUrl: item.product_id
+                  ? (imageByProductId.get(item.product_id) ?? null)
+                  : null,
+              })),
+            };
+            return card;
           })}
-        </div>
+        />
       )}
     </AppShell>
   );
