@@ -326,9 +326,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         }
 
         if (!passwordHasNumberAndSpecialChar(password)) {
-          setPasswordError(
-            "The password must contain characters and numbers (ex: /, _, *, etc..)",
-          );
+          showFieldNotice("Please enter your password correctly");
           setLoading(false);
           return;
         }
