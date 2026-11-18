@@ -444,7 +444,12 @@ export function AuthForm({ mode }: AuthFormProps) {
       router.push("/categories");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      if (mode === "login" && /invalid login credentials/i.test(message)) {
+        showFieldNotice("Invalid Email or Password");
+      } else {
+        setError(message);
+      }
     } finally {
       if (!keepAuthLoader) {
         setLoading(false);
