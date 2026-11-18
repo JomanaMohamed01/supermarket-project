@@ -493,8 +493,9 @@ export function AuthForm({ mode }: AuthFormProps) {
             Groceries from every aisle, ready for your cart.
           </h1>
           <p className="mt-4 max-w-md text-base text-cream/85">
-            Sign {isSignup ? "up" : "in"} to browse meat, produce, dairy, pantry
-            staples, and more — then checkout when you&apos;re ready.
+            {isSignup
+              ? "Sign up to browse meat, produce, dairy, pantry staples, and more — then checkout when you're ready."
+              : "Sign in to browse meat, produce, dairy, pantry staples, and more — then checkout when you're ready."}
           </p>
         </section>
 
