@@ -710,6 +710,11 @@ export function AuthForm({ mode }: AuthFormProps) {
                   )}
                 </button>
               </div>
+              {isSignup && (
+                <p className="text-xs leading-5 text-ink-soft">
+                  Password must consist of alphabet, numbers & characters as ( /, *, _ ) etc
+                </p>
+              )}
               {passwordError && (
                 <p className="text-sm font-medium text-danger">{passwordError}</p>
               )}
