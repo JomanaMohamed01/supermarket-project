@@ -103,7 +103,7 @@ export function SiteHeader({
     "U";
 
   function itemClass(_active: boolean, divided = true) {
-    return `relative block w-full bg-transparent px-3.5 py-2.5 text-left text-sm leading-5 font-semibold tracking-wide text-ink transition hover:bg-transparent hover:text-leaf ${
+    return `relative block w-full bg-transparent px-3.5 py-4 text-left text-sm leading-5 font-semibold tracking-wide text-ink transition hover:bg-transparent hover:text-leaf ${
       divided
         ? "after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-line after:content-['']"
         : ""
