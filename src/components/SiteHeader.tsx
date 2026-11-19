@@ -22,6 +22,7 @@ export function SiteHeader({
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
   const [confirmSignOut, setConfirmSignOut] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [portalReady, setPortalReady] = useState(false);
@@ -34,6 +35,16 @@ export function SiteHeader({
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (menuOpen) {
+      setMenuVisible(true);
+      return;
+    }
+
+    const timer = setTimeout(() => setMenuVisible(false), 450);
+    return () => clearTimeout(timer);
+  }, [menuOpen]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -146,10 +157,14 @@ export function SiteHeader({
               )}
             </button>
 
-            {menuOpen && (
+            {menuVisible && (
               <div
                 role="menu"
-                className="absolute right-0 z-20 mt-2 flex w-48 animate-fade flex-col overflow-hidden rounded-2xl border border-line bg-cream shadow-[var(--shadow)]"
+                className={`absolute right-0 z-20 mt-2 flex w-48 flex-col overflow-hidden rounded-2xl border border-line bg-cream shadow-[var(--shadow)] ${
+                  menuOpen
+                    ? "animate-fade"
+                    : "pointer-events-none animate-fade-out"
+                }`}
               >
                 <Link
                   href="/categories"
