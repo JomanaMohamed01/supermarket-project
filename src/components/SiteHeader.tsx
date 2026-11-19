@@ -166,7 +166,7 @@ export function SiteHeader({
                   onClick={() => setMenuOpen(false)}
                 >
                   <span className="flex items-center justify-between gap-3">
-                    Cart
+                    My cart
                     {cartCount > 0 && (
                       <span className="grid h-5 min-w-5 place-items-center rounded-full bg-citrus px-1 text-[10px] font-bold text-ink">
                         {cartCount}
