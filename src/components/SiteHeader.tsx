@@ -91,11 +91,11 @@ export function SiteHeader({
     email?.charAt(0)?.toUpperCase() ||
     "U";
 
-  function itemClass(active: boolean) {
-    return `block w-full rounded-xl px-3 py-2.5 text-left text-sm leading-5 font-semibold tracking-wide transition ${
-      active
-        ? "bg-bg-deep text-ink"
-        : "text-ink hover:bg-bg-deep hover:text-leaf"
+  function itemClass(_active: boolean, divided = true) {
+    return `relative block w-full bg-transparent px-3.5 py-2.5 text-left text-sm leading-5 font-semibold tracking-wide text-ink transition hover:bg-transparent hover:text-leaf ${
+      divided
+        ? "after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-line after:content-['']"
+        : ""
     }`;
   }
 
@@ -149,7 +149,7 @@ export function SiteHeader({
             {menuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 z-20 mt-2 flex w-48 animate-fade flex-col gap-1 rounded-2xl border border-line bg-cream p-2 shadow-[var(--shadow)]"
+                className="absolute right-0 z-20 mt-2 flex w-48 animate-fade flex-col overflow-hidden rounded-2xl border border-line bg-cream shadow-[var(--shadow)]"
               >
                 <Link
                   href="/categories"
@@ -197,7 +197,7 @@ export function SiteHeader({
                     setMenuOpen(false);
                     setConfirmSignOut(true);
                   }}
-                  className={itemClass(false)}
+                  className={itemClass(false, false)}
                 >
                   Sign out
                 </button>
