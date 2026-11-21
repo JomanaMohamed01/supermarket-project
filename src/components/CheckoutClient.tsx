@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ActionLoader } from "@/components/ActionLoader";
 import { ProductImage } from "@/components/ProductImage";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/format";
@@ -26,6 +27,7 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
   async function placeOrder() {
     setLoading(true);
     setError(null);
+    let placed = false;
 
     try {
       const supabase = createClient();
@@ -80,12 +82,12 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
 
       if (clearError) throw clearError;
 
+      placed = true;
       router.push(`/order-success?order=${order.id}`);
-      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not place order");
     } finally {
-      setLoading(false);
+      if (!placed) setLoading(false);
     }
   }
 
@@ -108,6 +110,7 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
 
   return (
     <div className="animate-rise space-y-8 text-left">
+      {loading && <ActionLoader message="Placing order..." />}
       <ul className="space-y-4">
         {items.map((item) => (
           <li
@@ -157,7 +160,7 @@ export function CheckoutClient({ items }: { items: CartRow[] }) {
         disabled={loading}
         className="w-full rounded-xl bg-leaf px-6 py-4 text-lg font-semibold text-cream transition hover:bg-leaf-bright disabled:opacity-60"
       >
-        {loading ? "Placing order..." : "Proceed payment"}
+        Proceed payment
       </button>
     </div>
   );
