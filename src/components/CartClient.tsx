@@ -113,7 +113,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
           <button
             type="button"
             onClick={() => router.push("/categories")}
-            className="mt-6 rounded-xl bg-leaf px-5 py-3 font-semibold text-cream"
+            className="mt-6 cursor-pointer rounded-xl bg-leaf px-5 py-3 font-semibold text-cream"
           >
             Start shopping
           </button>
