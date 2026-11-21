@@ -139,10 +139,10 @@ export function SiteHeader({
         </Link>
 
         {email && (
-          <div className="ml-auto flex items-center gap-2 min-[611px]:gap-3 min-[685px]:gap-5">
+          <div className="ml-auto flex items-center gap-2 min-[611px]:gap-10">
             <nav
               aria-label="Account"
-              className="hidden items-center gap-3.5 text-[13px] min-[611px]:flex min-[760px]:gap-10"
+              className="hidden items-center gap-3.5 text-[13px] min-[611px]:flex min-[611px]:gap-6"
             >
               <Link
                 href="/categories"
