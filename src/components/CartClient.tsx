@@ -18,6 +18,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
   const router = useRouter();
   const [localItems, setLocalItems] = useState(items);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [clearing, setClearing] = useState(false);
   const [loaderMessage, setLoaderMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +74,42 @@ export function CartClient({ items }: { items: CartRow[] }) {
       setError(err instanceof Error ? err.message : "Could not update cart");
     } finally {
       setBusyId(null);
+      setLoaderMessage(null);
+    }
+  }
+
+  async function emptyCart() {
+    const previousItems = localItems;
+
+    setClearing(true);
+    setError(null);
+    setLoaderMessage("Emptying cart...");
+    setLocalItems([]);
+
+    try {
+      const client = supabase();
+      const {
+        data: { user },
+      } = await client.auth.getUser();
+
+      if (!user) {
+        setLocalItems(previousItems);
+        router.push("/login");
+        return;
+      }
+
+      const { error: deleteError } = await client
+        .from("cart_items")
+        .delete()
+        .eq("user_id", user.id);
+
+      if (deleteError) throw deleteError;
+      router.refresh();
+    } catch (err) {
+      setLocalItems(previousItems);
+      setError(err instanceof Error ? err.message : "Could not empty cart");
+    } finally {
+      setClearing(false);
       setLoaderMessage(null);
     }
   }
@@ -157,7 +194,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
                 <div className="flex items-center rounded-xl border border-line bg-cream">
                   <button
                     type="button"
-                    disabled={busyId === item.id}
+                    disabled={clearing || busyId === item.id}
                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
                     className="cursor-pointer px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
                     aria-label="Decrease quantity"
@@ -169,7 +206,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
                   </span>
                   <button
                     type="button"
-                    disabled={busyId === item.id}
+                    disabled={clearing || busyId === item.id}
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     className="cursor-pointer px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
                     aria-label="Increase quantity"
@@ -179,7 +216,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
                 </div>
                 <button
                   type="button"
-                  disabled={busyId === item.id}
+                  disabled={clearing || busyId === item.id}
                   onClick={() => removeItem(item.id)}
                   className="cursor-pointer text-sm font-semibold text-danger hover:underline disabled:opacity-50"
                 >
@@ -203,13 +240,24 @@ export function CartClient({ items }: { items: CartRow[] }) {
               {formatMoney(total)}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => router.push("/checkout")}
-            className="cursor-pointer rounded-xl bg-leaf px-6 py-3.5 font-semibold text-cream transition hover:bg-leaf-bright"
-          >
-            Go to checkout
-          </button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              disabled={clearing}
+              onClick={emptyCart}
+              className="cursor-pointer rounded-xl border border-danger bg-danger px-6 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+            >
+              Empty the cart
+            </button>
+            <button
+              type="button"
+              disabled={clearing}
+              onClick={() => router.push("/checkout")}
+              className="cursor-pointer rounded-xl bg-leaf px-6 py-3.5 font-semibold text-cream transition hover:bg-leaf-bright disabled:opacity-60"
+            >
+              Go to checkout
+            </button>
+          </div>
         </div>
       </div>
     </>
