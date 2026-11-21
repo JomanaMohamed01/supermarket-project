@@ -305,7 +305,7 @@ export function AccountClient({ profile }: AccountClientProps) {
         <button
           type="submit"
           disabled={savingAddress}
-          className="mt-4 w-full rounded-xl bg-leaf px-4 py-3.5 font-semibold text-cream transition hover:bg-leaf-bright disabled:opacity-60 sm:w-auto sm:px-6"
+          className="mt-4 w-full rounded-xl bg-leaf px-4 py-3.5 font-semibold text-cream transition hover:bg-leaf-bright disabled:opacity-60"
         >
           {savingAddress ? "Saving..." : "Save address"}
         </button>
@@ -333,7 +333,7 @@ export function AccountClient({ profile }: AccountClientProps) {
           type="button"
           disabled={deletingAccount}
           onClick={() => setConfirmDeleteOpen(true)}
-          className="mt-5 w-full rounded-xl border border-danger bg-danger px-4 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-60 sm:w-auto sm:px-6"
+          className="mt-5 w-full rounded-xl border border-danger bg-danger px-4 py-3.5 font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
         >
           Delete my account
         </button>
