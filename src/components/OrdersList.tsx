@@ -67,7 +67,7 @@ export function OrdersList({ orders }: { orders: OrderCard[] }) {
               className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
             >
               <div className="overflow-hidden">
-                <div className="border-t border-line px-5 pt-4 pb-5 sm:px-6">
+                <div className="px-5 pt-1 pb-5 sm:px-6">
                   {order.items.length > 0 ? (
                     <ul className="space-y-4">
                       {order.items.map((item) => (
