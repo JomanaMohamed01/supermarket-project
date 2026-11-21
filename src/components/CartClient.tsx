@@ -131,7 +131,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
           {localItems.map((item) => (
             <li
               key={item.id}
-              className="flex flex-col gap-4 border-b border-line pb-6 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-4 border-b border-line pb-6 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex items-center gap-4">
                 <ProductImage
@@ -196,7 +196,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
           </p>
         )}
 
-        <div className="flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-ink-soft">Cart subtotal</p>
             <p className="font-[family-name:var(--font-fraunces)] text-3xl font-semibold text-ink">
