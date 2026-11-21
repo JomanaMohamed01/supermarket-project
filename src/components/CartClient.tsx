@@ -159,7 +159,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
                     type="button"
                     disabled={busyId === item.id}
                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    className="px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
+                    className="cursor-pointer px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
                     aria-label="Decrease quantity"
                   >
                     −
@@ -171,7 +171,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
                     type="button"
                     disabled={busyId === item.id}
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    className="px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
+                    className="cursor-pointer px-3 py-2 font-bold text-ink-soft hover:text-ink disabled:opacity-50"
                     aria-label="Increase quantity"
                   >
                     +
@@ -181,7 +181,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
                   type="button"
                   disabled={busyId === item.id}
                   onClick={() => removeItem(item.id)}
-                  className="text-sm font-semibold text-danger hover:underline disabled:opacity-50"
+                  className="cursor-pointer text-sm font-semibold text-danger hover:underline disabled:opacity-50"
                 >
                   Remove
                 </button>
@@ -206,7 +206,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
           <button
             type="button"
             onClick={() => router.push("/checkout")}
-            className="rounded-xl bg-leaf px-6 py-3.5 font-semibold text-cream transition hover:bg-leaf-bright"
+            className="cursor-pointer rounded-xl bg-leaf px-6 py-3.5 font-semibold text-cream transition hover:bg-leaf-bright"
           >
             Go to checkout
           </button>
