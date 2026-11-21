@@ -109,7 +109,7 @@ export function CartClient({ items }: { items: CartRow[] }) {
           <h2 className="font-[family-name:var(--font-fraunces)] text-2xl font-semibold">
             Your cart is empty
           </h2>
-          <p className="mt-2 text-ink-soft">Browse an aisle and add a few items.</p>
+          <p className="mt-2 text-ink-soft">Browse an aisle and add the items you want.</p>
           <button
             type="button"
             onClick={() => router.push("/categories")}
