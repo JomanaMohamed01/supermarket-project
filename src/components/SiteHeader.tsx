@@ -37,6 +37,15 @@ export function SiteHeader({
   }, [pathname]);
 
   useEffect(() => {
+    const query = window.matchMedia("(max-width: 610px)");
+    function onChange() {
+      if (!query.matches) setMenuOpen(false);
+    }
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
     if (menuOpen) {
       setMenuVisible(true);
       return;
@@ -102,6 +111,12 @@ export function SiteHeader({
     email?.charAt(0)?.toUpperCase() ||
     "U";
 
+  function navClass(active: boolean) {
+    return `font-semibold tracking-wide whitespace-nowrap transition ${
+      active ? "text-leaf" : "text-ink hover:text-leaf"
+    }`;
+  }
+
   function itemClass(_active: boolean, divided = true) {
     return `relative block w-full bg-transparent px-3.5 py-4 text-left text-sm leading-5 font-semibold tracking-wide text-ink transition hover:bg-transparent hover:text-leaf ${
       divided
@@ -126,14 +141,61 @@ export function SiteHeader({
         </Link>
 
         {email && (
+          <div className="ml-auto flex items-center gap-2 min-[611px]:gap-3 min-[685px]:gap-5">
+            <nav
+              aria-label="Account"
+              className="hidden items-center gap-3.5 text-[13px] min-[611px]:flex min-[760px]:gap-10"
+            >
+              <Link
+                href="/categories"
+                className={navClass(pathname.startsWith("/categories"))}
+              >
+                Shop
+              </Link>
+              <Link
+                href="/cart"
+                className={navClass(pathname.startsWith("/cart"))}
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  My cart
+                  {cartCount > 0 && (
+                    <span className="grid h-5 min-w-5 place-items-center rounded-full bg-citrus px-1 text-[10px] font-bold text-ink">
+                      {cartCount}
+                    </span>
+                  )}
+                </span>
+              </Link>
+              <Link
+                href="/orders"
+                className={navClass(pathname.startsWith("/orders"))}
+              >
+                My orders
+              </Link>
+              <Link
+                href="/account"
+                className={navClass(pathname.startsWith("/account"))}
+              >
+                My profile
+              </Link>
+              <button
+                type="button"
+                onClick={() => setConfirmSignOut(true)}
+                className={navClass(false)}
+              >
+                Sign out
+              </button>
+            </nav>
           <div className="relative" ref={menuRef}>
             <button
               type="button"
               aria-label="Account menu"
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((open) => !open)}
-              className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-full border transition ${
+              onClick={() => {
+                if (!window.matchMedia("(max-width: 610px)").matches) return;
+                setMenuOpen((open) => !open);
+              }}
+              className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-full border transition max-[610px]:cursor-pointer min-[611px]:cursor-default ${
                 menuOpen || pathname.startsWith("/account")
                   ? "border-leaf ring-2 ring-leaf/25"
                   : "border-line hover:border-leaf/40"
@@ -160,7 +222,7 @@ export function SiteHeader({
             {menuVisible && (
               <div
                 role="menu"
-                className={`absolute right-0 z-20 mt-2 flex w-48 flex-col overflow-hidden rounded-2xl border border-line bg-cream shadow-[var(--shadow)] ${
+                className={`absolute right-0 z-20 mt-2 flex w-48 flex-col overflow-hidden rounded-2xl border border-line bg-cream shadow-[var(--shadow)] min-[611px]:hidden ${
                   menuOpen
                     ? "animate-fade"
                     : "pointer-events-none animate-fade-out"
@@ -218,6 +280,7 @@ export function SiteHeader({
                 </button>
               </div>
             )}
+          </div>
           </div>
         )}
       </div>
