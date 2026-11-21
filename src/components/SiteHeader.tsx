@@ -208,7 +208,7 @@ export function SiteHeader({
                   </span>
                 )}
                 {cartCount > 0 && (
-                  <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-citrus px-0.5 text-[9px] font-bold text-ink">
+                  <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-citrus px-0.5 text-[9px] font-bold text-ink min-[611px]:hidden">
                     {cartCount}
                   </span>
                 )}
