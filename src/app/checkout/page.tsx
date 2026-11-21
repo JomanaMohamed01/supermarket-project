@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { CheckoutClient } from "@/components/CheckoutClient";
 import { requireUser } from "@/lib/auth";
@@ -23,7 +24,13 @@ export default async function CheckoutPage() {
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-2xl text-center">
+      <Link
+        href="/cart"
+        className="inline-block text-sm font-semibold text-leaf hover:underline"
+      >
+        ← Go back to cart
+      </Link>
+      <div className="mx-auto mt-6 w-full max-w-2xl text-center">
         <div className="mb-8">
           <p className="text-sm font-semibold tracking-[0.16em] text-leaf uppercase">
             Checkout
