@@ -112,17 +112,15 @@ export function SiteHeader({
     "U";
 
   function navClass(active: boolean) {
-    return `font-semibold tracking-wide whitespace-nowrap transition ${
-      active ? "text-leaf" : "text-ink hover:text-leaf"
-    }`;
+    return `font-semibold tracking-wide whitespace-nowrap transition ${active ? "text-leaf" : "text-ink hover:text-leaf"
+      }`;
   }
 
   function itemClass(_active: boolean, divided = true) {
-    return `relative block w-full bg-transparent px-3.5 py-4 text-left text-sm leading-5 font-semibold tracking-wide text-ink transition hover:bg-transparent hover:text-leaf ${
-      divided
+    return `relative block w-full bg-transparent px-3.5 py-4 text-left text-sm leading-5 font-semibold tracking-wide text-ink transition hover:bg-transparent hover:text-leaf ${divided
         ? "after:absolute after:inset-x-3 after:bottom-0 after:h-px after:bg-line after:content-['']"
         : ""
-    }`;
+      }`;
   }
 
   return (
@@ -171,12 +169,6 @@ export function SiteHeader({
               >
                 My orders
               </Link>
-              <Link
-                href="/account"
-                className={navClass(pathname.startsWith("/account"))}
-              >
-                My profile
-              </Link>
               <button
                 type="button"
                 onClick={() => setConfirmSignOut(true)}
@@ -185,102 +177,104 @@ export function SiteHeader({
                 Sign out
               </button>
             </nav>
-          <div className="relative" ref={menuRef}>
-            <button
-              type="button"
-              aria-label="Account menu"
-              aria-haspopup="menu"
-              aria-expanded={menuOpen}
-              onClick={() => {
-                if (!window.matchMedia("(max-width: 610px)").matches) return;
-                setMenuOpen((open) => !open);
-              }}
-              className={`relative grid h-10 w-10 shrink-0 place-items-center rounded-full border transition max-[610px]:cursor-pointer min-[611px]:cursor-default ${
-                menuOpen || pathname.startsWith("/account")
-                  ? "border-leaf ring-2 ring-leaf/25"
-                  : "border-line hover:border-leaf/40"
-              }`}
-            >
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt=""
-                  className="h-full w-full rounded-full object-cover"
-                />
-              ) : (
-                <span className="grid h-full w-full place-items-center rounded-full bg-bg-deep text-sm font-bold text-leaf">
-                  {initials}
-                </span>
-              )}
-              {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-citrus px-0.5 text-[9px] font-bold text-ink">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-
-            {menuVisible && (
-              <div
-                role="menu"
-                className={`absolute right-0 z-20 mt-2 flex w-48 flex-col overflow-hidden rounded-2xl border border-line bg-cream shadow-[var(--shadow)] min-[611px]:hidden ${
-                  menuOpen
-                    ? "animate-fade"
-                    : "pointer-events-none animate-fade-out"
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                aria-label={menuOpen ? "Account menu" : "My profile"}
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={() => {
+                  if (window.matchMedia("(min-width: 611px)").matches) {
+                    router.push("/account");
+                    return;
+                  }
+                  setMenuOpen((open) => !open);
+                }}
+                className={`relative grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-full border transition ${
+                  menuOpen || pathname.startsWith("/account")
+                    ? "border-leaf ring-2 ring-leaf/25"
+                    : "border-line hover:border-leaf/40"
                 }`}
               >
-                <Link
-                  href="/categories"
-                  role="menuitem"
-                  className={itemClass(pathname.startsWith("/categories"))}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  Shop
-                </Link>
-                <Link
-                  href="/cart"
-                  role="menuitem"
-                  className={itemClass(pathname.startsWith("/cart"))}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <span className="flex items-center justify-between gap-3">
-                    My cart
-                    {cartCount > 0 && (
-                      <span className="grid h-5 min-w-5 place-items-center rounded-full bg-citrus px-1 text-[10px] font-bold text-ink">
-                        {cartCount}
-                      </span>
-                    )}
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="grid h-full w-full place-items-center rounded-full bg-bg-deep text-sm font-bold text-leaf">
+                    {initials}
                   </span>
-                </Link>
-                <Link
-                  href="/orders"
-                  role="menuitem"
-                  className={itemClass(pathname.startsWith("/orders"))}
-                  onClick={() => setMenuOpen(false)}
+                )}
+                {cartCount > 0 && (
+                  <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-citrus px-0.5 text-[9px] font-bold text-ink">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              {menuVisible && (
+                <div
+                  role="menu"
+                  className={`absolute right-0 z-20 mt-2 flex w-48 flex-col overflow-hidden rounded-2xl border border-line bg-cream shadow-[var(--shadow)] min-[611px]:hidden ${menuOpen
+                      ? "animate-fade"
+                      : "pointer-events-none animate-fade-out"
+                    }`}
                 >
-                  My orders
-                </Link>
-                <Link
-                  href="/account"
-                  role="menuitem"
-                  className={itemClass(pathname.startsWith("/account"))}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  My profile
-                </Link>
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setConfirmSignOut(true);
-                  }}
-                  className={itemClass(false, false)}
-                >
-                  Sign out
-                </button>
-              </div>
-            )}
-          </div>
+                  <Link
+                    href="/categories"
+                    role="menuitem"
+                    className={itemClass(pathname.startsWith("/categories"))}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Shop
+                  </Link>
+                  <Link
+                    href="/cart"
+                    role="menuitem"
+                    className={itemClass(pathname.startsWith("/cart"))}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <span className="flex items-center justify-between gap-3">
+                      My cart
+                      {cartCount > 0 && (
+                        <span className="grid h-5 min-w-5 place-items-center rounded-full bg-citrus px-1 text-[10px] font-bold text-ink">
+                          {cartCount}
+                        </span>
+                      )}
+                    </span>
+                  </Link>
+                  <Link
+                    href="/orders"
+                    role="menuitem"
+                    className={itemClass(pathname.startsWith("/orders"))}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    My orders
+                  </Link>
+                  <Link
+                    href="/account"
+                    role="menuitem"
+                    className={itemClass(pathname.startsWith("/account"))}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    My profile
+                  </Link>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setConfirmSignOut(true);
+                    }}
+                    className={itemClass(false, false)}
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
