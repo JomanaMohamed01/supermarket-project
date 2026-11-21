@@ -365,12 +365,12 @@ export function AccountClient({ profile }: AccountClientProps) {
                 This will permanently remove your profile, cart, and account
                 access. You won&apos;t be able to undo this.
               </p>
-              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
                 <button
                   type="button"
                   disabled={deletingAccount}
                   onClick={() => setConfirmDeleteOpen(false)}
-                  className="rounded-xl border border-line bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-bg-deep disabled:opacity-60"
+                  className="w-full rounded-xl border border-line bg-white px-4 py-3 text-sm font-semibold text-ink transition hover:bg-bg-deep disabled:opacity-60 sm:flex-1"
                 >
                   Cancel
                 </button>
@@ -378,7 +378,7 @@ export function AccountClient({ profile }: AccountClientProps) {
                   type="button"
                   disabled={deletingAccount}
                   onClick={deleteAccount}
-                  className="rounded-xl bg-danger px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                  className="w-full rounded-xl bg-danger px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60 sm:flex-1"
                 >
                   {deletingAccount ? "Deleting..." : "Yes, delete account"}
                 </button>
