@@ -32,7 +32,7 @@ export default async function OrderSuccessPage({ searchParams }: PageProps) {
           Thanks for shopping FreshLane
         </h1>
         <p className="mt-4 text-ink-soft">
-          Your order is saved in Supabase. You can keep browsing the aisles
+          Your order is saved in our dashboard. You can keep browsing the aisles
           whenever you&apos;re ready.
         </p>
         {total !== null && (
